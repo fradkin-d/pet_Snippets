@@ -17,7 +17,11 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
+from MainApp import views as main_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', main_views.index_page, name='home'),
+    path('snippets/add', main_views.add_snippet_page, name='add_snippet_page'),
+    path('snippets/list', main_views.snippets_list_page, name='snippets_list_page'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
