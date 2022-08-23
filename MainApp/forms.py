@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.forms import CharField, PasswordInput, ModelForm
+from MainApp.models import Snippet
 
 
 class UserRegistrationForm(UserCreationForm):
@@ -25,3 +26,10 @@ class UserRegistrationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
+class SnippetForm(ModelForm):
+    class Meta:
+        model = Snippet
+        fields = ['name', 'lang', 'code', 'is_private']
+        

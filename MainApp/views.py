@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib import auth
-from MainApp.forms import UserRegistrationForm
+from MainApp.forms import UserRegistrationForm, SnippetForm
+from django.contrib.auth.decorators import login_required
+from django.views.generic.list import ListView
+from .models import Snippet
 
 
 def index_page(request):
@@ -9,17 +12,17 @@ def index_page(request):
 
 
 def registration(request):
+    form = UserRegistrationForm
     if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        print('1'*50)
+        form = form(request.POST)
         if form.is_valid():
-            print('2'*50)
             form.save()
-            print('3'*50)
+            # return Success message
             return redirect('home')
+        # return Error message
     context = {
         'pagename': 'Регистрация',
-        'form': UserRegistrationForm,
+        'form': form,
     }
     return render(request, 'pages/registration.html', context)
 
@@ -31,6 +34,7 @@ def login(request):
         user = auth.authenticate(request, username=username, password=password)
         if user:
             auth.login(request, user)
+            # return Success message
         else:
             # return Error message
             pass
@@ -42,11 +46,29 @@ def logout(request):
     return redirect('home')
 
 
+@login_required
 def add_snippet_page(request):
-    context = {'pagename': 'Добавление нового сниппета'}
+    form = SnippetForm
+    if request.method == 'POST':
+        form = form(request.POST)
+        form.instance.author = request.user
+        if form.is_valid():
+            form.save()
+            # return Success message
+            return redirect('snippets_list_page')
+    context = {
+        'pagename': 'Добавление нового сниппета',
+        'form': form
+    }
     return render(request, 'pages/add_snippet.html', context)
 
 
-def snippets_list_page(request):
-    context = {'pagename': 'Просмотр сниппетов'}
-    return render(request, 'pages/view_snippets.html', context)
+class SnippetListView(ListView):
+    model = Snippet
+    template_name = 'pages/snippet_list.html'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pagename'] = 'Просмотр сниппетов'
+        return context
