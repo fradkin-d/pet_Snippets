@@ -7,17 +7,36 @@
                 Snippets
             </a>
 
-            <button class="navbar-toggler" type="button" data-target="#navbarCollapse"
-                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+<!--            <button class="navbar-toggler" type="button" data-target="#navbarCollapse"-->
+<!--                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">-->
+<!--                <span class="navbar-toggler-icon"></span>-->
+<!--            </button>-->
 
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav mr-auto">
-                    <li class="form-inline"><a class="btn btn-outline-secondary"
+                    {% if request.user.is_authenticated %}
+                    <li class="form-inline"><a class="btn btn-info"
                                                href="{% url 'add_snippet_page' %}">Добавить сниппет</a></li>
-                    <li class="form-inline"><a class="btn btn-outline-secondary"
+                    {% endif %}
+                    <li class="form-inline"><a class="btn btn-info"
                                                href="{% url 'snippets_list_page' %}">Посмотреть сниппеты</a></li>
+                </ul>
+            </div>
+            <div>
+                <ul class="navbar-nav mr-auto">
+                    {% if request.user.is_authenticated %}
+                    <span class="navbar-text">Welcome, {{request.user.username }}!</span>
+                    <li class="form-inline"><a class="btn btn-outline-info"
+                                               href="{% url 'logout' %}">Выход</a></li>
+                    {% else %}
+                    <form method="post" action="{% url 'login' %}">{% csrf_token %}
+                        <input name="username" class="btn btn-light" type="text" placeholder="Логин">
+                        <input name="password" class="btn btn-light" type="password" placeholder="Пароль">
+                        <button type="submit" class="btn btn-info">Войти</button>
+                    </form>
+                    <li class="form-inline"><a class="btn btn-dark"
+                                               href="{% url 'registration' %}">Регистрация</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
