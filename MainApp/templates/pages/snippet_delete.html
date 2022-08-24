@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block main %}
+<div class="row">
+
+    <form method="post">{% csrf_token %}
+        <div class="col">
+            Вы уверены, что хотите удалить "{{ object.name }}"?
+            {{ form }}
+        </div>
+        <div class="col">
+            <input type="submit" class="btn btn-secondary" value="Да">
+            <a class="btn btn-primary" href="{{ back_page }}">Нет</a>
+        </div>
+    </form>
+
+</div>
+<div class="row">
+    <div class="col">
+        <code>
+            <pre>{{ object.code }}</pre>
+        </code>
+    </div>
+</div>
+{% endblock %}

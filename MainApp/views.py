@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.contrib import auth
 from MainApp.forms import UserRegistrationForm, SnippetForm
 from django.contrib.auth.decorators import login_required
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import UpdateView, DeleteView
 from .models import Snippet
 
 
@@ -43,6 +44,7 @@ def login(request):
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
+@login_required
 def logout(request):
     auth.logout(request)
     return redirect('home')
@@ -101,6 +103,7 @@ class SnippetDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['pagename'] = 'Просмотр сниппета'
+        context['my_snippet'] = self.get_object().author == self.request.user
         return context
 
 
@@ -113,4 +116,18 @@ class SnippetUpdateView(UpdateView):
         "code",
     ]
     template_name = 'pages/snippet_update.html'
-    success_url = '/snippets/my/list/'
+    success_url = reverse_lazy('my_snippets_list_page')
+
+
+class SnippetDeleteView(DeleteView):
+    model = Snippet
+    success_url = reverse_lazy('my_snippets_list_page')
+    template_name = 'pages/snippet_delete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pagename'] = 'Удаление сниппета'
+        context['back_page'] = self.request.META.get('HTTP_REFERER', '/')
+        return context
+
+

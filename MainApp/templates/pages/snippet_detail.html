@@ -1,20 +1,35 @@
 {% extends 'base.html' %}
 
 {% block main %}
+<div class="row bg-warning border-bottom">
+    {% if snippet.is_private %}
+    <div class="col" align="center">Приватный сниппет</div>
+    {% endif %}
+</div>
 <div class="row bg-info border-bottom">
     <div class="col">Имя</div>
     <div class="col">Язык</div>
     <div class="col">Дата создания</div>
-    <div class="col">Скрыт</div>
     <div class="col">Автор</div>
+    {% if my_snippet %}
+    <div class="col-1"></div>
+    <div class="col-1"></div>
+    {% endif %}
 </div>
 
 <div class="row">
     <div class="col">{{ snippet.name }}</div>
     <div class="col">{{ snippet.lang }}</div>
     <div class="col">{{ snippet.creation_date }}</div>
-    <div class="col">{{ snippet.is_private }}</div>
     <div class="col">{{ snippet.author }}</div>
+    {% if my_snippet %}
+    <div class="col-1">
+        <a href="{% url 'snippet_update_page' snippet.slug %}">Изменить</a>
+    </div>
+    <div class="col-1">
+        <a href="{% url 'snippet_delete_page' snippet.slug %}">Удалить</a>
+    </div>
+    {% endif %}
 </div>
 <hr>
 <div class="row">

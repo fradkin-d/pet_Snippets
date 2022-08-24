@@ -21,7 +21,7 @@
             <div>
                 <ul class="navbar-nav mr-auto">
                     {% if request.user.is_authenticated %}
-                    <span class="navbar-text">Welcome, {{request.user.username }}!</span>
+                    <span class="navbar-text">Добро пожаловать, {{request.user.username }}!</span>
                     <li class="form-inline"><a class="btn"
                                                href="{% url 'add_snippet_page' %}">Добавить сниппет</a></li>
                     <li class="form-inline"><a class="btn"
@@ -32,7 +32,7 @@
                     <form method="post" action="{% url 'login' %}">{% csrf_token %}
                         <input name="username" class="btn btn-light" type="text" placeholder="Логин">
                         <input name="password" class="btn btn-light" type="password" placeholder="Пароль">
-                        <button type="submit" class="btn btn-info">Войти</button>
+                        <button type="submit" class="btn btn-primary">Войти</button>
                     </form>
                     <li class="form-inline"><a class="btn btn-dark"
                                                href="{% url 'registration' %}">Регистрация</a></li>

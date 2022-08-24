@@ -7,6 +7,7 @@
     <div class="col">Имя</div>
     <div class="col-1">Скрыт</div>
     <div class="col-1"></div>
+    <div class="col-1"></div>
 </div>
 
 {% for snippet in object_list %}
@@ -21,6 +22,9 @@
     <div class="col-1">{{ snippet.is_private }}</div>
     <div class="col-1">
         <a href="{% url 'snippet_update_page' snippet.slug %}">Изменить</a>
+    </div>
+    <div class="col-1">
+        <a href="{% url 'snippet_delete_page' snippet.slug %}">Удалить</a>
     </div>
 </div>
 
