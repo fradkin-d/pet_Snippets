@@ -2,10 +2,26 @@
 
 {% block main %}
 <div class="row bg-info border-bottom">
-    <div class="col-2">Дата создания</div>
-    <div class="col-1">Язык</div>
-    <div class="col">Имя</div>
-    <div class="col-2">Автор</div>
+    <div class="col-2">
+        <a href="{% url 'snippets_list_page' %}?sort=creation_date">
+            Дата создания
+        </a>
+    </div>
+    <div class="col-1">
+        <a href="{% url 'snippets_list_page' %}?sort=lang">
+            Язык
+        </a>
+    </div>
+    <div class="col">
+        <a href="{% url 'snippets_list_page' %}?sort=name">
+            Имя
+        </a>
+    </div>
+    <div class="col-2">
+        <a href="{% url 'snippets_list_page' %}?sort=author">
+            Автор
+        </a>
+    </div>
 </div>
 
 {% for snippet in object_list %}
@@ -25,22 +41,28 @@
 
 {% if is_paginated%}
 <div class="pagination">
-    <span class="page-links">
+    <div class="page-links">
         {% if page_obj.has_previous %}
-        <a href="{% url 'snippets_list_page' %}?page={{ page_obj.previous_page_number }}"><<<</a>
+        <a href="{% url 'snippets_list_page' %}?sort={{ current_order|default:'creation_date' }}
+&page={{ page_obj.previous_page_number }}">
+            <<<
+        </a>
         {% else %}
         <<<
         {% endif %}
 
         {% if page_obj.has_next %}
-        <a href="{% url 'snippets_list_page' %}?page={{ page_obj.next_page_number }}">>>></a>
+        <a href="{% url 'snippets_list_page' %}?sort={{ current_order|default:'creation_date' }}
+&page={{ page_obj.next_page_number }}">
+            >>>
+        </a>
         {% else %}
         >>>
         {% endif %}
-        <p class="page-current">
+        <div class="page-current">
             Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
-        </p>
-    </span>
+        </div>
+    </div>
 </div>
 {% endif %}
 {% endblock %}

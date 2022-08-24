@@ -73,11 +73,18 @@ class SnippetListView(ListView):
     paginate_by = 32
 
     def get_queryset(self):
-        return Snippet.objects.filter(is_private=False)
+        """Not the best way, but was easy for me. Need to change in future"""
+        return super().get_queryset().filter(is_private=False)
+
+    def get_ordering(self):
+        ordering = self.request.GET.get('sort')
+        return ordering
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['pagename'] = 'Список сниппетов'
+        context['current_order'] = self.get_ordering()
+        context['current_page'] = self.get_ordering()
         return context
 
 
@@ -87,11 +94,17 @@ class MySnippetListView(ListView):
     paginate_by = 32
 
     def get_queryset(self):
-        return Snippet.objects.filter(author=self.request.user)
+        return super().get_queryset().filter(author=self.request.user)
+
+    def get_ordering(self):
+        ordering = self.request.GET.get('sort')
+        return ordering
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['pagename'] = 'Мои сниппеты'
+        context['current_order'] = self.get_ordering()
+        context['current_page'] = self.get_ordering()
         return context
 
 
