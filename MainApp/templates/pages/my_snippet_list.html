@@ -2,21 +2,28 @@
 
 {% block main %}
 <div class="row bg-info border-bottom">
+    <div class="col-2">Дата создания</div>
+    <div class="col-1">Язык</div>
     <div class="col">Имя</div>
-    <div class="col">Язык</div>
-    <div class="col">Дата создания</div>
-    <div class="col">Скрыт</div>
+    <div class="col-1">Скрыт</div>
+    <div class="col-1"></div>
 </div>
 
 {% for snippet in object_list %}
-<a href="{% url 'snippet_detail_page' snippet.slug %}">
-    <div class="row border-bottom">
-        <div class="col">{{ snippet.name }}</div>
-        <div class="col">{{ snippet.lang }}</div>
-        <div class="col">{{ snippet.creation_date }}</div>
-        <div class="col">{{ snippet.is_private }}</div>
+<div class="row border-bottom">
+    <div class="col-2">{{ snippet.creation_date }}</div>
+    <div class="col-1">{{ snippet.lang }}</div>
+    <div class="col">
+        <a href="{% url 'snippet_detail_page' snippet.slug %}">
+            {{ snippet.name }}
+        </a>
     </div>
-</a>
+    <div class="col-1">{{ snippet.is_private }}</div>
+    <div class="col-1">
+        <a href="{% url 'snippet_update_page' snippet.slug %}">Изменить</a>
+    </div>
+</div>
+
 {% empty %}
 Пока нет ни одного сниппета
 {% endfor %}

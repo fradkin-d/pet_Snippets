@@ -4,6 +4,7 @@ from MainApp.forms import UserRegistrationForm, SnippetForm
 from django.contrib.auth.decorators import login_required
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
+from django.views.generic.edit import UpdateView
 from .models import Snippet
 
 
@@ -101,3 +102,15 @@ class SnippetDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['pagename'] = 'Просмотр сниппета'
         return context
+
+
+class SnippetUpdateView(UpdateView):
+    model = Snippet
+    fields = [
+        "name",
+        "lang",
+        "is_private",
+        "code",
+    ]
+    template_name = 'pages/snippet_update.html'
+    success_url = '/snippets/my/list/'
