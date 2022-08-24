@@ -3,24 +3,40 @@
 {% block main %}
 <div class="row bg-info border-bottom">
     <div class="col-2">
-        <a href="{% url 'my_snippets_list_page' %}?sort=creation_date">
-            Дата создания
-        </a>
+        {% if current_order == 'creation_date' %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=-creation_date">Дата создания⬇</a>
+        {% elif current_order == '-creation_date' %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=creation_date">Дата создания⬆</a>
+        {% else %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=creation_date">Дата создания</a>
+        {% endif %}
     </div>
     <div class="col-1">
-        <a href="{% url 'my_snippets_list_page' %}?sort=lang">
-            Язык
-        </a>
+        {% if current_order == 'lang' %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=-lang">Язык⬇</a>
+        {% elif current_order == '-lang' %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=lang">Язык⬆</a>
+        {% else %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=lang">Язык</a>
+        {% endif %}
     </div>
     <div class="col">
-        <a href="{% url 'my_snippets_list_page' %}?sort=name">
-            Имя
-        </a>
+        {% if current_order == 'name' %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=-name">Имя⬇</a>
+        {% elif current_order == '-name' %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=name">Имя⬆</a>
+        {% else %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=name">Имя</a>
+        {% endif %}
     </div>
     <div class="col-1">
-        <a href="{% url 'my_snippets_list_page' %}?sort=is_private">
-            Скрыт
-        </a>
+        {% if current_order == 'is_private' %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=-is_private">Скрыт⬇</a>
+        {% elif current_order == '-is_private' %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=is_private">Скрыт⬆</a>
+        {% else %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=is_private">Скрыт</a>
+        {% endif %}
     </div>
     <div class="col-1"></div>
     <div class="col-1"></div>
