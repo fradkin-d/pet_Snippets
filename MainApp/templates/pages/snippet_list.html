@@ -10,13 +10,15 @@
 </div>
 
 {% for snippet in object_list %}
-<div class="row border-bottom">
-    <div class="col">{{ snippet.name }}</div>
-    <div class="col">{{ snippet.lang }}</div>
-    <div class="col">{{ snippet.creation_date }}</div>
-    <div class="col">{{ snippet.is_private }}</div>
-    <div class="col">{{ snippet.author }}</div>
-</div>
+<a href="{% url 'snippet_detail_page' snippet.slug %}">
+    <div class="row border-bottom">
+        <div class="col">{{ snippet.name }}</div>
+        <div class="col">{{ snippet.lang }}</div>
+        <div class="col">{{ snippet.creation_date }}</div>
+        <div class="col">{{ snippet.is_private }}</div>
+        <div class="col">{{ snippet.author }}</div>
+    </div>
+</a>
 {% empty %}
 Пока нет ни одного сниппета
 {% endfor %}

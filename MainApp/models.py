@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.text import slugify
+import random as rd
+import datetime as dt
 
 
 class SupportedLang(models.Model):
@@ -16,3 +19,8 @@ class Snippet(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     is_private = models.BooleanField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+    slug = models.SlugField(unique=True, default=None)
+
+    def save(self, *args, **kwargs):
+        self.slug = '_'.join((slugify(self.name), dt.datetime.now().strftime('%d-%m-%y-%H-%M-%S')))
+        super().save(*args, **kwargs)

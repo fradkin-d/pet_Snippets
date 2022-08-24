@@ -3,6 +3,7 @@ from django.contrib import auth
 from MainApp.forms import UserRegistrationForm, SnippetForm
 from django.contrib.auth.decorators import login_required
 from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
 from .models import Snippet
 
 
@@ -70,5 +71,16 @@ class SnippetListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['pagename'] = 'Просмотр сниппетов'
+        context['pagename'] = 'Список сниппетов'
+        return context
+
+
+class SnippetDetailView(DetailView):
+    model = Snippet
+    template_name = 'pages/snippet_detail.html'
+    context_object_name = 'snippet'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pagename'] = 'Просмотр сниппета'
         return context
