@@ -5,7 +5,7 @@
     <div class="col">Имя</div>
     <div class="col">Язык</div>
     <div class="col">Дата создания</div>
-    <div class="col">Автор</div>
+    <div class="col">Скрыт</div>
 </div>
 
 {% for snippet in object_list %}
@@ -14,7 +14,7 @@
         <div class="col">{{ snippet.name }}</div>
         <div class="col">{{ snippet.lang }}</div>
         <div class="col">{{ snippet.creation_date }}</div>
-        <div class="col">{{ snippet.author }}</div>
+        <div class="col">{{ snippet.is_private }}</div>
     </div>
 </a>
 {% empty %}

@@ -14,18 +14,18 @@
 
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav mr-auto">
-                    {% if request.user.is_authenticated %}
-                    <li class="form-inline"><a class="btn btn-info"
-                                               href="{% url 'add_snippet_page' %}">Добавить сниппет</a></li>
-                    {% endif %}
-                    <li class="form-inline"><a class="btn btn-info"
-                                               href="{% url 'snippets_list_page' %}">Посмотреть сниппеты</a></li>
+                    <li class="form-inline"><a class="btn"
+                                               href="{% url 'snippets_list_page' %}">База сниппетов</a></li>
                 </ul>
             </div>
             <div>
                 <ul class="navbar-nav mr-auto">
                     {% if request.user.is_authenticated %}
                     <span class="navbar-text">Welcome, {{request.user.username }}!</span>
+                    <li class="form-inline"><a class="btn"
+                                               href="{% url 'add_snippet_page' %}">Добавить сниппет</a></li>
+                    <li class="form-inline"><a class="btn"
+                                               href="{% url 'my_snippets_list_page' %}">Мои сниппеты</a></li>
                     <li class="form-inline"><a class="btn btn-outline-info"
                                                href="{% url 'logout' %}">Выход</a></li>
                     {% else %}

@@ -69,9 +69,26 @@ class SnippetListView(ListView):
     template_name = 'pages/snippet_list.html'
     paginate_by = 10
 
+    def get_queryset(self):
+        return Snippet.objects.filter(is_private=False)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['pagename'] = 'Список сниппетов'
+        return context
+
+
+class MySnippetListView(ListView):
+    model = Snippet
+    template_name = 'pages/my_snippet_list.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Snippet.objects.filter(author=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pagename'] = 'Мои сниппеты'
         return context
 
 
