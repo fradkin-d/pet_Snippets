@@ -19,8 +19,28 @@
     </div>
     <div class="col-2">{{ snippet.author }}</div>
 </div>
-
 {% empty %}
 Пока нет ни одного сниппета
 {% endfor %}
+
+{% if is_paginated%}
+<div class="pagination">
+    <span class="page-links">
+        {% if page_obj.has_previous %}
+        <a href="{% url 'snippets_list_page' %}?page={{ page_obj.previous_page_number }}"><<<</a>
+        {% else %}
+        <<<
+        {% endif %}
+
+        {% if page_obj.has_next %}
+        <a href="{% url 'snippets_list_page' %}?page={{ page_obj.next_page_number }}">>>></a>
+        {% else %}
+        >>>
+        {% endif %}
+        <p class="page-current">
+            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+        </p>
+    </span>
+</div>
+{% endif %}
 {% endblock %}

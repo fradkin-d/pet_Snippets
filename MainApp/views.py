@@ -59,7 +59,7 @@ def add_snippet_page(request):
         if form.is_valid():
             form.save()
             # return Success message
-            return redirect('snippets_list_page')
+            return redirect(request.META.get('HTTP_REFERER', '/'))
     context = {
         'pagename': 'Добавление нового сниппета',
         'form': form
@@ -70,7 +70,7 @@ def add_snippet_page(request):
 class SnippetListView(ListView):
     model = Snippet
     template_name = 'pages/snippet_list.html'
-    paginate_by = 10
+    paginate_by = 32
 
     def get_queryset(self):
         return Snippet.objects.filter(is_private=False)
@@ -84,7 +84,7 @@ class SnippetListView(ListView):
 class MySnippetListView(ListView):
     model = Snippet
     template_name = 'pages/my_snippet_list.html'
-    paginate_by = 10
+    paginate_by = 32
 
     def get_queryset(self):
         return Snippet.objects.filter(author=self.request.user)
