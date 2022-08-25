@@ -1,102 +1,202 @@
 {% extends 'base.html' %}
 
 {% block main %}
-<div class="row bg-info border-bottom">
-    <div class="col-2">
-        {% if current_order == 'creation_date' %}
-        <a href="{% url 'snippets_list_page' %}?sort=-creation_date">Дата создания ▽</a>
-        {% elif current_order == '-creation_date' %}
-        <a href="{% url 'snippets_list_page' %}?sort=creation_date">Дата создания △</a>
-        {% else %}
-        <a href="{% url 'snippets_list_page' %}?sort=creation_date">Дата создания</a>
-        {% endif %}
+<div class="row">
+    <div class="col-3">
+        <div class="row">
+            <div class="col">Фильтры</div>
+        </div>
+        <form action="{% url 'snippets_list_page' %}"
+              method="get" class="form-group">
+            <input hidden name="sort" value="{{ current_order|default:'creation_date' }}">
+            <div class="row">
+                <div class="col-2">C</div>
+                <div class="col">
+                    <input type="date" name="date_from" value="{{ filter_date_from }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">По</div>
+                <div class="col">
+                    <input type="date" name="date_to" value="{{ filter_date_to }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">Язык</div>
+                <div class="col">
+                    <select name="lang">
+                        <option value="all">Все</option>
+                        {% for lang in langs %}
+                        {% if lang == filter_lang %}
+                        <option selected value="{{ lang }}">{{ lang }}</option>
+                        {% else %}
+                        <option value="{{ lang }}">{{ lang }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">Автор</div>
+                <div class="col">
+                    <select name="author">
+                        <option value="all">Все</option>
+                        {% for author in authors %}
+                        {% if author == filter_author %}
+                        <option selected value="{{ author }}">{{ author }}</option>
+                        {% else %}
+                        <option value="{{ author }}">{{ author }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input type="submit" value="Применить">
+                </div>
+                <div class="col">
+                    <a class="btn" href="{% url 'snippets_list_page' %}">Сбросить</a>
+                </div>
+            </div>
+        </form>
     </div>
-    <div class="col-1">
-        {% if current_order == 'lang' %}
-        <a href="{% url 'snippets_list_page' %}?sort=-lang">Язык ▽</a>
-        {% elif current_order == '-lang' %}
-        <a href="{% url 'snippets_list_page' %}?sort=lang">Язык △</a>
-        {% else %}
-        <a href="{% url 'snippets_list_page' %}?sort=lang">Язык</a>
-        {% endif %}
-    </div>
-    <div class="col">
-        {% if current_order == 'name' %}
-        <a href="{% url 'snippets_list_page' %}?sort=-name">Имя ▽</a>
-        {% elif current_order == '-name' %}
-        <a href="{% url 'snippets_list_page' %}?sort=name">Имя △</a>
-        {% else %}
-        <a href="{% url 'snippets_list_page' %}?sort=name">Имя</a>
-        {% endif %}
-    </div>
-    <div class="col-1">
-        {% if current_order == 'like_count' %}
-        <a href="{% url 'snippets_list_page' %}?sort=-like_count">Рейтинг ▽</a>
-        {% elif current_order == '-like_count' %}
-        <a href="{% url 'snippets_list_page' %}?sort=like_count">Рейтинг △</a>
-        {% else %}
-        <a href="{% url 'snippets_list_page' %}?sort=like_count">Рейтинг</a>
-        {% endif %}
-    </div>
-    <div class="col-1">
-        {% if current_order == 'comment_count' %}
-        <a href="{% url 'snippets_list_page' %}?sort=-comment_count">Отзывы ▽</a>
-        {% elif current_order == '-comment_count' %}
-        <a href="{% url 'snippets_list_page' %}?sort=comment_count">Отзывы △</a>
-        {% else %}
-        <a href="{% url 'snippets_list_page' %}?sort=comment_count">Отзывы</a>
-        {% endif %}
-    </div>
-    <div class="col-2">
-        {% if current_order == 'author' %}
-        <a href="{% url 'snippets_list_page' %}?sort=-author">Автор ▽</a>
-        {% elif current_order == '-author' %}
-        <a href="{% url 'snippets_list_page' %}?sort=author">Автор △</a>
-        {% else %}
-        <a href="{% url 'snippets_list_page' %}?sort=author">Автор</a>
-        {% endif %}
-    </div>
-</div>
 
-{% for snippet in object_list %}
-<div class="row border-bottom">
-    <div class="col-2">{{ snippet.creation_date }}</div>
-    <div class="col-1">{{ snippet.lang }}</div>
     <div class="col">
-        <a href="{% url 'snippet_detail_page' snippet.slug %}">
-            {{ snippet.name }}
-        </a>
-    </div>
-    <div class="col-1">{{ snippet.snippetlike_set.count }}</div>
-    <div class="col-1">{{ snippet.comment_set.count }}</div>
-    <div class="col-2">{{ snippet.author }}</div>
-</div>
-{% empty %}
-Пока нет ни одного сниппета
-{% endfor %}
+        <div class="row bg-info border-bottom">
+            <div class="col-2">
+                {% if current_order == 'creation_date' %}
+                <a href="{% url 'snippets_list_page' %}?sort=-creation_date&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Дата создания ▽
+                </a>
+                {% elif current_order == '-creation_date' %}
+                <a href="{% url 'snippets_list_page' %}?sort=creation_date&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Дата создания △
+                </a>
+                {% else %}
+                <a href="{% url 'snippets_list_page' %}?sort=creation_date&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Дата создания
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-1">
+                {% if current_order == 'lang' %}
+                <a href="{% url 'snippets_list_page' %}?sort=-lang&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Язык ▽
+                </a>
+                {% elif current_order == '-lang' %}
+                <a href="{% url 'snippets_list_page' %}?sort=lang&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Язык △
+                </a>
+                {% else %}
+                <a href="{% url 'snippets_list_page' %}?sort=lang&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Язык
+                </a>
+                {% endif %}
+            </div>
+            <div class="col">
+                {% if current_order == 'name' %}
+                <a href="{% url 'snippets_list_page' %}?sort=-name&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Имя ▽
+                </a>
+                {% elif current_order == '-name' %}
+                <a href="{% url 'snippets_list_page' %}?sort=name&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Имя △
+                </a>
+                {% else %}
+                <a href="{% url 'snippets_list_page' %}?sort=name&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Имя
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-1">
+                {% if current_order == 'like_count' %}
+                <a href="{% url 'snippets_list_page' %}?sort=-like_count&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Рейтинг ▽
+                </a>
+                {% elif current_order == '-like_count' %}
+                <a href="{% url 'snippets_list_page' %}?sort=like_count&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Рейтинг △
+                </a>
+                {% else %}
+                <a href="{% url 'snippets_list_page' %}?sort=like_count&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Рейтинг
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-1">
+                {% if current_order == 'comment_count' %}
+                <a href="{% url 'snippets_list_page' %}?sort=-comment_count&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Отзывы ▽
+                </a>
+                {% elif current_order == '-comment_count' %}
+                <a href="{% url 'snippets_list_page' %}?sort=comment_count&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Отзывы △
+                </a>
+                {% else %}
+                <a href="{% url 'snippets_list_page' %}?sort=comment_count&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Отзывы
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-2">
+                {% if current_order == 'author' %}
+                <a href="{% url 'snippets_list_page' %}?sort=-author&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Автор ▽
+                </a>
+                {% elif current_order == '-author' %}
+                <a href="{% url 'snippets_list_page' %}?sort=author&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Автор △
+                </a>
+                {% else %}
+                <a href="{% url 'snippets_list_page' %}?sort=author&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}">
+                    Автор
+                </a>
+                {% endif %}
+            </div>
+        </div>
 
-{% if is_paginated%}
-<div class="pagination">
-    <div class="page-links">
-        {% if page_obj.has_previous %}
-        <a href="{% url 'snippets_list_page' %}?sort={{ current_order|default:'creation_date' }}
+        {% for snippet in object_list %}
+        <div class="row border-bottom">
+            <div class="col-2">{{ snippet.creation_date }}</div>
+            <div class="col-1">{{ snippet.lang }}</div>
+            <div class="col">
+                <a href="{% url 'snippet_detail_page' snippet.slug %}">
+                    {{ snippet.name }}
+                </a>
+            </div>
+            <div class="col-1">{{ snippet.snippetlike_set.count }}</div>
+            <div class="col-1">{{ snippet.comment_set.count }}</div>
+            <div class="col-2">{{ snippet.author }}</div>
+        </div>
+        {% empty %}
+        Пока нет ни одного сниппета
+        {% endfor %}
+
+        {% if is_paginated%}
+        <div class="pagination">
+            <div class="page-links">
+                {% if page_obj.has_previous %}
+                <a href="{% url 'snippets_list_page' %}?sort={{ current_order|default:'creation_date' }}&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}
 &page={{ page_obj.previous_page_number }}">
-            <<<
-        </a>
-        {% else %}
-        <<<
-        {% endif %}
+                    <<<
+                </a>
+                {% else %}
+                <<<
+                {% endif %}
 
-        {% if page_obj.has_next %}
-        <a href="{% url 'snippets_list_page' %}?sort={{ current_order|default:'creation_date' }}
+                {% if page_obj.has_next %}
+                <a href="{% url 'snippets_list_page' %}?sort={{ current_order|default:'creation_date' }}&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}&lang={{ filter_lang }}&author={{ filter_author }}
 &page={{ page_obj.next_page_number }}">
-            >>>
-        </a>
-        {% else %}
-        >>>
-        {% endif %}
-        <div class="page-current">
-            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                    >>>
+                </a>
+                {% else %}
+                >>>
+                {% endif %}
+                <div class="page-current">
+                    Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                </div>
+            </div>
         </div>
     </div>
 </div>
