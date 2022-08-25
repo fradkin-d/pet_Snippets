@@ -38,6 +38,24 @@
         <a href="{% url 'my_snippets_list_page' %}?sort=is_private">Скрыт</a>
         {% endif %}
     </div>
+    <div class="col-1">
+        {% if current_order == 'like_count' %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=-like_count">Рейтинг ▽</a>
+        {% elif current_order == '-like_count' %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=like_count">Рейтинг △</a>
+        {% else %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=like_count">Рейтинг</a>
+        {% endif %}
+    </div>
+    <div class="col-1">
+        {% if current_order == 'comment_count' %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=-comment_count">Отзывы ▽</a>
+        {% elif current_order == '-comment_count' %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=comment_count">Отзывы △</a>
+        {% else %}
+        <a href="{% url 'my_snippets_list_page' %}?sort=comment_count">Отзывы</a>
+        {% endif %}
+    </div>
     <div class="col-1"></div>
     <div class="col-1"></div>
 </div>
@@ -52,6 +70,20 @@
         </a>
     </div>
     <div class="col-1">{{ snippet.is_private }}</div>
+    <div class="col-1">
+        {% if snippet.is_private %}
+        [{{ snippet.snippetlike_set.count }}]
+        {% else %}
+        {{ snippet.snippetlike_set.count }}
+        {% endif %}
+    </div>
+    <div class="col-1">
+        {% if snippet.is_private %}
+        [{{ snippet.comment_set.count }}]
+        {% else %}
+        {{ snippet.comment_set.count }}
+        {% endif %}
+    </div>
     <div class="col-1">
         <a href="{% url 'snippet_update_page' snippet.slug %}">Изменить</a>
     </div>

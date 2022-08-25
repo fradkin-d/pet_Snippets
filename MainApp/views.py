@@ -93,23 +93,15 @@ class SnippetListView(ListView):
         return context
 
 
-class MySnippetListView(ListView):
-    model = Snippet
+class MySnippetListView(SnippetListView):
     template_name = 'pages/my_snippet_list.html'
-    paginate_by = 32
 
     def get_queryset(self):
-        return super().get_queryset().filter(author=self.request.user)
-
-    def get_ordering(self):
-        ordering = self.request.GET.get('sort')
-        return ordering
+        return super(SnippetListView, self).get_queryset().filter(author=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['pagename'] = 'Мои сниппеты'
-        context['current_order'] = self.get_ordering()
-        context['current_page'] = self.get_ordering()
         return context
 
 
@@ -163,9 +155,8 @@ def create_comment(request):
 
 
 def delete_comment(request, pk):
-    comment = Comment.objects.get(pk=pk)
-    if comment.author == request.user:
-        comment.delete()
+    comment = Comment.objects.get(pk=pk, author=request.user)
+    comment.delete()
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 

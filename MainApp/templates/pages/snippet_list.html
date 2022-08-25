@@ -36,7 +36,7 @@
         <a href="{% url 'snippets_list_page' %}?sort=like_count">Рейтинг △</a>
         {% else %}
         <a href="{% url 'snippets_list_page' %}?sort=like_count">Рейтинг</a>
-        {% endif %} 
+        {% endif %}
     </div>
     <div class="col-1">
         {% if current_order == 'comment_count' %}
