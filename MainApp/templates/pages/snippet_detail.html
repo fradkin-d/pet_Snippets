@@ -38,7 +38,7 @@
         <div class="row">
             <div class="col">
                 Likes: {{ snippet.snippetlike_set.count }}
-                {%if user.snippetlike_set.count <= 0 %}
+                {% if not is_liked %}
                 <a href="{% url 'create_snippetlike' snippet.id %}">Лайк</a>
                 {% else %}
                 <a href="{% url 'delete_snippetlike' snippet.id %}">Дизлайк</a>

@@ -118,6 +118,7 @@ class SnippetDetailView(DetailView):
         context['pagename'] = 'Просмотр сниппета'
         context['user'] = self.request.user
         context['comment_form'] = CommentForm
+        context['is_liked'] = SnippetLike.objects.filter(snippet=self.object, author=self.request.user).exists()
         return context
 
 
