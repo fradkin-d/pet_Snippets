@@ -7,6 +7,7 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from .models import Snippet, Comment, SnippetLike
+from django.db.models import Count, Sum
 
 
 def index_page(request):
@@ -71,6 +72,10 @@ class SnippetListView(ListView):
     model = Snippet
     template_name = 'pages/snippet_list.html'
     paginate_by = 32
+    queryset = Snippet.objects.all().annotate(
+        comment_count=Count('comment'),
+        like_count=Sum('snippetlike')
+    )
 
     def get_queryset(self):
         """Not the best way, but was easy for me. Need to change in future"""

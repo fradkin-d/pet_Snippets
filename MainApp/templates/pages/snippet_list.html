@@ -29,6 +29,24 @@
         <a href="{% url 'snippets_list_page' %}?sort=name">Имя</a>
         {% endif %}
     </div>
+    <div class="col-1">
+        {% if current_order == 'like_count' %}
+        <a href="{% url 'snippets_list_page' %}?sort=-like_count">Рейтинг ▽</a>
+        {% elif current_order == '-like_count' %}
+        <a href="{% url 'snippets_list_page' %}?sort=like_count">Рейтинг △</a>
+        {% else %}
+        <a href="{% url 'snippets_list_page' %}?sort=like_count">Рейтинг</a>
+        {% endif %} 
+    </div>
+    <div class="col-1">
+        {% if current_order == 'comment_count' %}
+        <a href="{% url 'snippets_list_page' %}?sort=-comment_count">Отзывы ▽</a>
+        {% elif current_order == '-comment_count' %}
+        <a href="{% url 'snippets_list_page' %}?sort=comment_count">Отзывы △</a>
+        {% else %}
+        <a href="{% url 'snippets_list_page' %}?sort=comment_count">Отзывы</a>
+        {% endif %}
+    </div>
     <div class="col-2">
         {% if current_order == 'author' %}
         <a href="{% url 'snippets_list_page' %}?sort=-author">Автор ▽</a>
@@ -49,6 +67,8 @@
             {{ snippet.name }}
         </a>
     </div>
+    <div class="col-1">{{ snippet.snippetlike_set.count }}</div>
+    <div class="col-1">{{ snippet.comment_set.count }}</div>
     <div class="col-2">{{ snippet.author }}</div>
 </div>
 {% empty %}
