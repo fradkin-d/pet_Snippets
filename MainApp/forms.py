@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.forms import CharField, PasswordInput, ModelForm
-from MainApp.models import Snippet
+from MainApp.models import Snippet, Comment
 
 
 class UserRegistrationForm(UserCreationForm):
@@ -32,4 +32,11 @@ class SnippetForm(ModelForm):
     class Meta:
         model = Snippet
         fields = ['name', 'lang', 'code', 'is_private']
+
+
+class CommentForm(ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['text']
+
         

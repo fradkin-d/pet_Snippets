@@ -1,17 +1,12 @@
 {% extends 'base.html' %}
 
 {% block main %}
-<div class="row bg-warning border-bottom">
-    {% if snippet.is_private %}
-    <div class="col" align="center">Приватный сниппет</div>
-    {% endif %}
-</div>
 <div class="row bg-info border-bottom">
     <div class="col">Имя</div>
     <div class="col">Язык</div>
     <div class="col">Дата создания</div>
     <div class="col">Автор</div>
-    {% if my_snippet %}
+    {% if snippet.author == user %}
     <div class="col-1"></div>
     <div class="col-1"></div>
     {% endif %}
@@ -22,7 +17,7 @@
     <div class="col">{{ snippet.lang }}</div>
     <div class="col">{{ snippet.creation_date }}</div>
     <div class="col">{{ snippet.author }}</div>
-    {% if my_snippet %}
+    {% if snippet.author == user %}
     <div class="col-1">
         <a href="{% url 'snippet_update_page' snippet.slug %}">Изменить</a>
     </div>
@@ -33,8 +28,69 @@
 </div>
 <hr>
 <div class="row">
-    <div class="col">
-        <code><pre>{{ snippet.code }}</pre></code>
+    <div class="col border">
+        <code>
+            <pre>{{ snippet.code }}</pre>
+        </code>
     </div>
+    {% if not snippet.is_private %}
+    <div class="col-4">
+        <div class="row">
+            <div class="col">
+                Likes: {{ snippet.snippetlike_set.count }}
+                {%if user.snippetlike_set.count <= 0 %}
+                <a href="{% url 'create_snippetlike' snippet.id %}">Лайк</a>
+                {% else %}
+                <a href="{% url 'delete_snippetlike' snippet.id %}">Дизлайк</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            {% if request.user.is_authenticated %}
+            <div class="col border">
+                <form method="post" action="{% url 'create_comment' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name='snippet' value="{{ snippet.id }}">
+                    {{comment_form.as_p}}
+                    <input type="submit" value="Отправить">
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        {% for comment in snippet.comment_set.all|dictsortreversed:'date' %}
+        <div class="row">
+            <div class="col">
+                {{ comment.author }}
+            </div>
+            <div class="col" align="right">
+                {% if comment.author == user %}
+                <a href="{% url 'delete_comment' comment.id %}">Удалить</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{ comment.date }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{ comment.text }}
+            </div>
+        </div>
+        {% empty %}
+        <div class="row">
+            <div class="col">
+                Пока никто не оставил комментарий к этому сниппету
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="col-4" align="center">
+    Приватный сниппет
+</div>
+{% endif %}
 </div>
 {% endblock %}

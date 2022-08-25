@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.contrib import auth
-from MainApp.forms import UserRegistrationForm, SnippetForm
+from MainApp.forms import UserRegistrationForm, SnippetForm, CommentForm
 from django.contrib.auth.decorators import login_required
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import UpdateView, DeleteView
-from .models import Snippet
+from django.views.generic.edit import UpdateView, DeleteView, CreateView
+from .models import Snippet, Comment, SnippetLike
 
 
 def index_page(request):
@@ -116,7 +116,8 @@ class SnippetDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['pagename'] = 'Просмотр сниппета'
-        context['my_snippet'] = self.get_object().author == self.request.user
+        context['user'] = self.request.user
+        context['comment_form'] = CommentForm
         return context
 
 
@@ -144,3 +145,35 @@ class SnippetDeleteView(DeleteView):
         return context
 
 
+def create_comment(request):
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        form.instance.author = request.user
+        form.instance.snippet = Snippet.objects.get(pk=request.POST.get('snippet'))
+        if form.is_valid():
+            form.save()
+            # return Success message
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+def delete_comment(request, pk):
+    comment = Comment.objects.get(pk=pk)
+    if comment.author == request.user:
+        comment.delete()
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+def create_snippetlike(request, snippet_id):
+    snippet = Snippet.objects.get(pk=snippet_id)
+    user = request.user
+    if not SnippetLike.objects.filter(snippet=snippet, author=user).exists():
+        like = SnippetLike(snippet=snippet, author=user)
+        like.save()
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+def delete_snippetlike(request, snippet_id):
+    snippet = Snippet.objects.get(pk=snippet_id)
+    snippetlike = SnippetLike.objects.filter(snippet=snippet, author=request.user)
+    snippetlike.delete()
+    return redirect(request.META.get('HTTP_REFERER', '/'))

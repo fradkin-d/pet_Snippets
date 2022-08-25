@@ -19,6 +19,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from MainApp import views as main_views
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', main_views.index_page, name='home'),
@@ -31,4 +32,9 @@ urlpatterns = [
     path('snippets/<slug:slug>/', main_views.SnippetDetailView.as_view(), name='snippet_detail_page'),
     path('snippets/<slug:slug>/update', main_views.SnippetUpdateView.as_view(), name='snippet_update_page'),
     path('snippets/<slug:slug>/delete', main_views.SnippetDeleteView.as_view(), name='snippet_delete_page'),
+    path('comment/create', main_views.create_comment, name='create_comment'),
+    path('comment/delete/<int:pk>', main_views.delete_comment, name='delete_comment'),
+    path('snippetlike/create/<int:snippet_id>', main_views.create_snippetlike, name='create_snippetlike'),
+    path('snippetlike/delete/<int:snippet_id>', main_views.delete_snippetlike, name='delete_snippetlike'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
