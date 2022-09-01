@@ -1,43 +1,45 @@
 {% load static %}
+{% load crispy_forms_tags %}
 <header>
-    <nav class="navbar fixed-top navbar-expand-md">
+    <nav class="navbar fixed-top navbar-expand-md bg-light">
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">
                 <img src="{% static 'images/logo.png' %}" width="32" height="32" alt="">
-                Snippets
             </a>
+            <a class="btn" href="{% url 'snippets_list_page' %}">Сниппеты</a>
 
-<!--            <button class="navbar-toggler" type="button" data-target="#navbarCollapse"-->
-<!--                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">-->
-<!--                <span class="navbar-toggler-icon"></span>-->
-<!--            </button>-->
-
-            <div class="collapse navbar-collapse" id="navbarCollapse">
-                <ul class="navbar-nav mr-auto">
-                    <li class="form-inline"><a class="btn"
-                                               href="{% url 'snippets_list_page' %}">База сниппетов</a></li>
-                </ul>
-            </div>
-            <div>
-                <ul class="navbar-nav mr-auto">
+            <div class="dropdown">
+                <button class="btn dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
                     {% if request.user.is_authenticated %}
-                    <span class="navbar-text">Добро пожаловать, {{request.user.username }}!</span>
-                    <li class="form-inline"><a class="btn"
-                                               href="{% url 'add_snippet_page' %}">Добавить сниппет</a></li>
-                    <li class="form-inline"><a class="btn"
-                                               href="{% url 'my_snippets_list_page' %}">Мои сниппеты</a></li>
-                    <li class="form-inline"><a class="btn btn-outline-info"
-                                               href="{% url 'logout' %}">Выход</a></li>
+                    {% if request.user.username|length > 15 %}
+                    {{ request.user.username|slice:14 }}...
                     {% else %}
-                    <form method="post" action="{% url 'login' %}">{% csrf_token %}
-                        <input name="username" class="btn btn-light" type="text" placeholder="Логин">
-                        <input name="password" class="btn btn-light" type="password" placeholder="Пароль">
-                        <button type="submit" class="btn btn-primary">Войти</button>
-                    </form>
-                    <li class="form-inline"><a class="btn btn-dark"
-                                               href="{% url 'registration' %}">Регистрация</a></li>
+                    {{ request.user.username }}
                     {% endif %}
-                </ul>
+                    {% else %}
+                    Вход
+                    {% endif %}
+                </button>
+                <div class="dropdown-menu dropdown-menu-end" style="width: 380px;">
+                    {% if request.user.is_authenticated %}
+                    <a class="dropdown-item" href="{% url 'add_snippet_page' %}">Добавить сниппет</a>
+                    <a class="dropdown-item" href="{% url 'my_snippets_list_page' %}">Мои сниппеты</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{% url 'logout' %}">Выход</a>
+                    {% else %}
+                    <form class="px-4 py-3" action="{% url 'login' %}" method="POST">{% csrf_token %}
+                        <div class="form-group">
+                            <input name="username" class="form-control" placeholder="Логин" maxlength="150">
+                        </div>
+                        <input type="password" name="password" class="textinput textInput form-control"
+                               placeholder="Пароль">
+                        <input type="submit" class="btn btn-success form-control" value="Войти">
+                    </form>
+                    <div class="dropdown-divider"></div>
+                    <a class="btn form-control" href="{% url 'registration' %}">Регистрация</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </nav>

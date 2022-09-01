@@ -1,27 +1,22 @@
 {% extends 'base.html' %}
-{% load codetags %}
+{% load crispy_forms_tags %}
 
 {% block main %}
-<form action="{% url 'add_snippet_page' %}" method="post" class="form-group">
-    {% csrf_token %}
-    <div class="form-group row">
+<div class="container">
+    <form action="{% url 'add_snippet_page' %}" method="post">
+        {% csrf_token %}
         <div class="row">
-            <div class="col-2">
-                <input type="submit" class="btn btn-primary" value="Сохранить">
+            <div class="form-group col-md-2 mb-0">
+                {{ form.lang|as_crispy_field }}
             </div>
-            <div class="col-1">Имя</div>
-            <div class="col">{{ form.name }}</div>
-            <div class="col-1">Язык</div>
-            <div class="col-1">{{ form.lang }}</div>
-            <div class="col-1">Скрытый</div>
-            <div class="col-1">{{ form.is_private }}</div>
-        </div>
-        <div class="row">
-            <div class="col-1">Код</div>
-            <div class="col">
-                <code>{{ form.code }}</code>
+            <div class="form-group col-md mb-0">
+                {{ form.name|as_crispy_field }}
             </div>
         </div>
-    </div>
-</form>
+        {{ form.code|as_crispy_field }}
+        {{ form.is_private|as_crispy_field }}
+        <input type="hidden" name="author" value="{{ user.get_username }}">
+        <input type="submit" class="btn btn-success" value="Сохранить">
+    </form>
+</div>
 {% endblock %}

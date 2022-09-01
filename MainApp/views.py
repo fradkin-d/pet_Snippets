@@ -9,6 +9,9 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from .models import Snippet, Comment, SnippetLike, SupportedLang
 from django.db.models import Count, Sum
+from django.http import JsonResponse
+from datatableview.views import DatatableView
+from datatableview import Datatable, columns
 
 
 def index_page(request):
@@ -69,14 +72,20 @@ def add_snippet_page(request):
     return render(request, 'pages/add_snippet.html', context)
 
 
+class SnippetCreateView(CreateView):
+    model = Snippet
+    form_class = SnippetForm
+    template_name = 'pages/add_snippet.html'
+    success_url = reverse_lazy('my_snippets_list_page')
+
+    def form_valid(self, form):
+        form.instance.author_id = self.request.user.id
+        return super().form_valid(form)
+
+
 class SnippetUpdateView(UpdateView):
     model = Snippet
-    fields = [
-        "name",
-        "lang",
-        "is_private",
-        "code",
-    ]
+    form_class = SnippetForm
     template_name = 'pages/snippet_update.html'
     success_url = reverse_lazy('my_snippets_list_page')
 
@@ -103,63 +112,28 @@ class SnippetDetailView(DetailView):
         context['pagename'] = 'Просмотр сниппета'
         context['user'] = self.request.user
         context['comment_form'] = CommentForm
-        context['is_liked'] = SnippetLike.objects.filter(snippet=self.object, author=self.request.user).exists()
+        if self.request.user.id is not None:
+            context['is_liked'] = SnippetLike.objects.filter(snippet=self.object, author=self.request.user).exists()
+            context['anon_user'] = False
+        else:
+            context['anon_user'] = True
         return context
 
 
 class SnippetListView(ListView):
     model = Snippet
     template_name = 'pages/snippet_list.html'
-    paginate_by = 4
-    filter_date_from = ''
-    filter_date_to = ''
-    filter_lang = 'all'
-    filter_author = 'all'
     queryset = Snippet.objects.all().annotate(
         comment_count=Count('comment'),
         like_count=Sum('snippetlike')
     )
 
     def get_queryset(self):
-        queryset = super().get_queryset().filter(is_private=False)
-
-        # filter date from
-        self.filter_date_from = self.request.GET.get('date_from')
-        if self.filter_date_from is not None and self.filter_date_from not in ['', 'None']:
-            queryset = queryset.filter(creation_date__gte=self.filter_date_from)
-
-        # filter date to
-        self.filter_date_to = self.request.GET.get('date_to')
-        if self.filter_date_to is not None and self.filter_date_to not in ['', 'None']:
-            queryset = queryset.filter(creation_date__lte=self.filter_date_to)
-
-        # filter lang
-        self.filter_lang = self.request.GET.get('lang')
-        if self.filter_lang not in ['all', 'None'] and self.filter_lang is not None:
-            queryset = queryset.filter(lang=self.filter_lang)
-
-        # filter author
-        self.filter_author = self.request.GET.get('author')
-        if self.filter_author not in ['all', 'None'] and self.filter_author is not None:
-            author = User.objects.get(username=self.filter_author)
-            queryset = queryset.filter(author=author)
-
-        return queryset
-
-    def get_ordering(self):
-        ordering = self.request.GET.get('sort')
-        return ordering
+        return self.model.objects.all().filter(is_private=False)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['pagename'] = 'Список сниппетов'
-        context['current_order'] = context['current_page'] = self.get_ordering()
-        context['filter_date_from'] = self.filter_date_from
-        context['filter_date_to'] = self.filter_date_to
-        context['filter_lang'] = self.filter_lang
-        context['filter_author'] = self.filter_author
-        context['langs'] = [supported_lang.lang for supported_lang in SupportedLang.objects.all()]
-        context['authors'] = [user.username for user in User.objects.all()]
+        context['pagename'] = 'База сниппетов'
         return context
 
 
@@ -167,7 +141,7 @@ class MySnippetListView(SnippetListView):
     template_name = 'pages/my_snippet_list.html'
 
     def get_queryset(self):
-        return super(SnippetListView, self).get_queryset().filter(author=self.request.user)
+        return self.model.objects.all().filter(author=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -187,22 +161,37 @@ def create_comment(request):
 
 
 def delete_comment(request, pk):
-    comment = Comment.objects.get(pk=pk, author=request.user)
-    comment.delete()
+    Comment.objects.get(pk=pk, author=request.user).delete()
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
 def create_snippetlike(request, snippet_id):
     snippet = Snippet.objects.get(pk=snippet_id)
-    user = request.user
-    if not SnippetLike.objects.filter(snippet=snippet, author=user).exists():
-        like = SnippetLike(snippet=snippet, author=user)
-        like.save()
+    if not SnippetLike.objects.filter(snippet=snippet, author=request.user).exists():
+        SnippetLike(snippet=snippet, author=request.user).save()
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
 def delete_snippetlike(request, snippet_id):
     snippet = Snippet.objects.get(pk=snippet_id)
-    snippetlike = SnippetLike.objects.filter(snippet=snippet, author=request.user)
-    snippetlike.delete()
+    if SnippetLike.objects.filter(snippet=snippet, author=request.user).exists():
+        SnippetLike.objects.filter(snippet=snippet, author=request.user).delete()
     return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+def switch_like(request, snippet_id):
+    snippet = Snippet.objects.get(pk=snippet_id)
+    if not SnippetLike.objects.filter(snippet=snippet, author=request.user).exists():
+        SnippetLike(snippet=snippet, author=request.user).save()
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+    SnippetLike.objects.filter(snippet=snippet, author=request.user).delete()
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+def model_objects_json(model):
+    objects = model.objects.all()
+    data = [obj.to_dict_json() for obj in objects]
+    response = {
+        'data': data
+    }
+    return JsonResponse(response)

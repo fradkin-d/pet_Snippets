@@ -1,11 +1,17 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block main %}
-<form action="{% url 'registration' %}" method="post" class="form-group">
+<form action="{% url 'registration' %}" method="post" class="form-signin">
     {% csrf_token %}
-    <div class="form-group row">
-        {{ form.as_p }}
+    <div class="form-group row" align="center">
+        <div class="form-group col-md-4 mx-auto">
+            {{ form.username|as_crispy_field }}
+            {{ form.email|as_crispy_field }}
+            {{ form.password1|as_crispy_field }}
+            {{ form.password2|as_crispy_field }}
+            <input type="submit" class="btn btn-success mt-3" value="Зарегистрироваться">
+        </div>
     </div>
-    <input type="submit" value="Создать пользователя">
 </form>
 {% endblock %}

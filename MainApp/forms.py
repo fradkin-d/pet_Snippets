@@ -1,17 +1,20 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-from django.forms import CharField, PasswordInput, ModelForm
-from MainApp.models import Snippet, Comment
+import django.forms as forms
+from MainApp.models import Snippet, Comment, SupportedLang
 
 
 class UserRegistrationForm(UserCreationForm):
+    username = forms.CharField(label='Имя пользователя', max_length=150)
+    email = forms.EmailField(label='Адрес электронной почты')
+
     class Meta:
         model = User
         fields = ["username", "email"]
 
-    password1 = CharField(label="password", widget=PasswordInput)
-    password2 = CharField(label="password confirm", widget=PasswordInput)
+    password1 = forms.CharField(label="Пароль", widget=forms.PasswordInput)
+    password2 = forms.CharField(label="Повторите пароль", widget=forms.PasswordInput)
 
     def clean_password2(self):
         pass1 = self.cleaned_data.get("password1")
@@ -28,13 +31,23 @@ class UserRegistrationForm(UserCreationForm):
         return user
 
 
-class SnippetForm(ModelForm):
+CODE_LANGS = [('', '')]+[(code_lang.lang,)*2 for code_lang in SupportedLang.objects.all()]
+
+
+class SnippetForm(forms.ModelForm):
+    name = forms.CharField(label='Имя')
+    lang = forms.ModelChoiceField(queryset=SupportedLang.objects.all(), label='Язык', empty_label='')
+    code = forms.CharField(label='Код', widget=forms.Textarea)
+    is_private = forms.BooleanField(label='Приватный', required=False)
+
     class Meta:
         model = Snippet
         fields = ['name', 'lang', 'code', 'is_private']
 
 
-class CommentForm(ModelForm):
+class CommentForm(forms.ModelForm):
+    text = forms.CharField(label='Комментарий', widget=forms.Textarea(attrs={"rows": 2}))
+
     class Meta:
         model = Comment
         fields = ['text']

@@ -1,14 +1,18 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<link href="{% static 'css/pastie-theme.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
 
 {% block main %}
 <div class="row">
-
     <form method="post">{% csrf_token %}
-        <div class="col">
-            Вы уверены, что хотите удалить "{{ object.name }}"?
+        <div class="col mb-2">
+            Вы уверены, что хотите удалить "<b>{{ object.name }}</b>"?
             {{ form }}
         </div>
-        <div class="col">
+        <div class="col mb-2">
             <input type="submit" class="btn btn-secondary" value="Да">
             <a class="btn btn-primary" href="{{ back_page }}">Нет</a>
         </div>
@@ -16,10 +20,12 @@
 
 </div>
 <div class="row">
-    <div class="col">
-        <code>
-            <pre>{{ object.code }}</pre>
-        </code>
-    </div>
+    <pre>
+        <code data-language="{{ object.lang }}">{{ object.code}}</code>
+    </pre>
 </div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'js/rainbow-custom.min.js' %}"></script>
 {% endblock %}
