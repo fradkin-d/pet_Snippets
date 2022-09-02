@@ -34,7 +34,6 @@ urlpatterns = [
     path('snippets/<slug:slug>/delete', main_views.SnippetDeleteView.as_view(), name='snippet_delete_page'),
     path('comment/create', main_views.create_comment, name='create_comment'),
     path('comment/delete/<int:pk>', main_views.delete_comment, name='delete_comment'),
-    path('snippetlike/create/<int:snippet_id>', main_views.create_snippetlike, name='create_snippetlike'),
-    path('snippetlike/delete/<int:snippet_id>', main_views.delete_snippetlike, name='delete_snippetlike'),
+    path('ajax/switch_snippetlike/<int:snippet_id>', main_views.switch_snippetlike, name='switch_snippetlike'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

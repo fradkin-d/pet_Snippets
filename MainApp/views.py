@@ -3,15 +3,12 @@ from django.urls import reverse_lazy
 from django.contrib import auth
 from MainApp.forms import UserRegistrationForm, SnippetForm, CommentForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from .models import Snippet, Comment, SnippetLike, SupportedLang
 from django.db.models import Count, Sum
 from django.http import JsonResponse
-from datatableview.views import DatatableView
-from datatableview import Datatable, columns
 
 
 def index_page(request):
@@ -165,27 +162,16 @@ def delete_comment(request, pk):
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
-def create_snippetlike(request, snippet_id):
+def switch_snippetlike(request, snippet_id):
     snippet = Snippet.objects.get(pk=snippet_id)
-    if not SnippetLike.objects.filter(snippet=snippet, author=request.user).exists():
-        SnippetLike(snippet=snippet, author=request.user).save()
-    return redirect(request.META.get('HTTP_REFERER', '/'))
-
-
-def delete_snippetlike(request, snippet_id):
-    snippet = Snippet.objects.get(pk=snippet_id)
-    if SnippetLike.objects.filter(snippet=snippet, author=request.user).exists():
+    response = {
+        'was_liked': SnippetLike.objects.filter(snippet=snippet, author=request.user).exists()
+    }
+    if response['was_liked']:
         SnippetLike.objects.filter(snippet=snippet, author=request.user).delete()
-    return redirect(request.META.get('HTTP_REFERER', '/'))
-
-
-def switch_like(request, snippet_id):
-    snippet = Snippet.objects.get(pk=snippet_id)
-    if not SnippetLike.objects.filter(snippet=snippet, author=request.user).exists():
+    else:
         SnippetLike(snippet=snippet, author=request.user).save()
-        return redirect(request.META.get('HTTP_REFERER', '/'))
-    SnippetLike.objects.filter(snippet=snippet, author=request.user).delete()
-    return redirect(request.META.get('HTTP_REFERER', '/'))
+    return JsonResponse(response)
 
 
 def model_objects_json(model):

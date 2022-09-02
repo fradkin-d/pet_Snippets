@@ -10,12 +10,14 @@ font-size: 1rem;
 color: #000;
 font-weight: 700;
 }
+
 .media-body .metadata {
 display: inline-block;
 margin-left: .5rem;
 color: #777;
 font-size: .8125rem;
 }
+
 .footer-comment {
 color: #777;
 }
@@ -40,6 +42,10 @@ border-bottom: 1px solid rgba(34, 36, 38, .15);
 
 li {
 list-style-type: none;
+}
+
+.asteriskField {
+    display: none;
 }
 </style>
 <link href="{% static 'css/pastie-theme.css' %}" rel="stylesheet" type="text/css">
@@ -66,9 +72,11 @@ list-style-type: none;
 </table>
 
 <div class="row">
+    <div class="col">
         <pre>
             <code data-language="{{ snippet.lang }}">{{ snippet.code}}</code>
         </pre>
+    </div>
 </div>
 {% if not snippet.is_private %}
 <div class="row">
@@ -76,16 +84,15 @@ list-style-type: none;
         {% if anon_user %}
         <img src="{% static 'icons/heart_1.png' %}" style="text-decoration: none;">
         {% else %}
-        {% if not is_liked %}
-        <a href="{% url 'create_snippetlike' snippet.id %}" style="text-decoration: none;">
-            <img src="{% static 'icons/heart_0.png' %}" height="16">
-        </a>
-        {% else %}
-        <a href="{% url 'delete_snippetlike' snippet.id %}" style="text-decoration: none;">
-            <img src="{% static 'icons/heart_1.png' %}" height="16">
-        </a>
+        <span id="like_button" name="{{ snippet.id }}" href="" style="text-decoration: none;">
+            {% if not is_liked %}
+            <img class="like_image" src="{% static 'icons/heart_0.png' %}" height="16">
+            {% else %}
+            <img class="like_image" src="{% static 'icons/heart_1.png' %}" height="16">
+            {% endif %}
+        </span>
         {% endif %}
-        {% endif %}{{ snippet.snippetlike_set.count }}
+        <span id="like_count">{{ snippet.snippetlike_set.count }}</span>
     </div>
     <div class="col-2">
         <img src="{% static 'icons/comment.png' %}" height="16">&nbsp;{{ snippet.comment_set.all.count }}
@@ -103,32 +110,19 @@ list-style-type: none;
     </div>
     {% endif %}
 </div>
-
-{% if request.user.is_authenticated %}
-<div class="row">
-    <div class="col">
-        <form method="post" action="{% url 'create_comment' %}">
-            {% csrf_token %}
-            <input type="hidden" name='snippet' value="{{ snippet.id }}">
-            {{ comment_form.text|as_crispy_field }}
-            <input type="submit" class="btn btn-light mt-2" value="Отправить комментарий">
-        </form>
-    </div>
-</div>
-{% endif %}
-
+<hr>
 <div class="comments">
     <ul class="media-list">
         {% for comment in snippet.comment_set.all|dictsortreversed:'date' %}
         <li class="media">
             <div class="media-left">
-                <img class="media-object img-rounded" src="avatar1.jpg" alt="">
+                <img class="media-object img-rounded" src="" alt="">
             </div>
             <div class="media-body">
                 <div class="media-heading">
                     <div class="author">{{ comment.author }}</div>
                     <div class="metadata">
-                        <span class="date">{{ comment.date|date:'d.m.Y H:i' }}</span>
+                        <span class="date">{{ comment.date|date:'d.m.Y в H:i' }}</span>
                     </div>
                 </div>
                 <div class="media-text text-justify">{{ comment.text }}</div>
@@ -149,13 +143,62 @@ list-style-type: none;
         {% endfor %}
     </ul>
 </div>
+<hr>
+{% if request.user.is_authenticated %}
+<div class="row">
+    <div class="col">
+        <form method="post" action="{% url 'create_comment' %}">
+            {% csrf_token %}
+            <input type="hidden" name='snippet' value="{{ snippet.id }}">
+            {{ comment_form.text|as_crispy_field }}
+            <input type="submit" class="btn btn-light mt-2" value="Отправить">
+        </form>
+    </div>
+</div>
+{% endif %}
 {% else %}
-<div class="col-4" align="center">
-    Приватный сниппет
+<div class="row">
+    <hr>
+    <div class="col-4" align="center">
+        Приватный сниппет комментировать нельзя
+    </div>
 </div>
 {% endif %}
 {% endblock %}
 
 {% block script %}
 <script src="{% static 'js/rainbow-custom.min.js' %}"></script>
+<script src="{% static 'js/jquery-3.5.1.js' %}" type="text/javascript"></script>
+
+<script>
+    window.snippetlike_url = "{% url 'switch_snippetlike' snippet.id %}"
+</script>
+
+<!-- Like button handling -->
+<script>
+    $('#like_button').click(function(){
+        console.log('like_clicked');
+
+        var pk = $(this).attr('name');
+        var like_image = $(this).find('.like_image');
+        var like_count = parseInt($('#like_count').text());
+        console.log('like_count:', like_count);
+
+        $.ajax({
+            url: window.snippetlike_url,
+            type: "GET",
+            data: {},
+            dataType: "json",
+            success: function(response) {
+                if (response.was_liked) {
+                    like_image.attr('src', '{% static 'icons/heart_0.png' %}');
+                    $('#like_count').text(like_count - 1)
+                } else {
+                    like_image.attr('src', '{% static 'icons/heart_1.png' %}');
+                    $('#like_count').text(like_count + 1)
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

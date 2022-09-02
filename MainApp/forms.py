@@ -46,7 +46,7 @@ class SnippetForm(forms.ModelForm):
 
 
 class CommentForm(forms.ModelForm):
-    text = forms.CharField(label='Комментарий', widget=forms.Textarea(attrs={"rows": 2}))
+    text = forms.CharField(label='Ваш комментарий', widget=forms.Textarea(attrs={"rows": 2}))
 
     class Meta:
         model = Comment
