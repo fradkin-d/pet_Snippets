@@ -82,7 +82,7 @@ list-style-type: none;
 <div class="row">
     <div class="col-2">
         {% if anon_user %}
-        <img src="{% static 'icons/heart_1.png' %}" style="text-decoration: none;">
+        <img src="{% static 'icons/heart_1.png' %}" style="text-decoration: none;" height="16">
         {% else %}
         <span id="like_button" name="{{ snippet.id }}" href="" style="text-decoration: none;">
             {% if not is_liked %}
