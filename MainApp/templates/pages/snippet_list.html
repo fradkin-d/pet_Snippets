@@ -5,19 +5,13 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
-<script>
-    $(document).ready( function () {
-        $('#snippets_table').DataTable();
-    } );
-</script>
 {% endblock %}
-
 
 {% block main %}
 <table id="snippets_table" class="display">
     <thead>
     <tr>
-<!--        <th>Дата</th>-->
+        <th>Дата</th>
         <th>Язык</th>
         <th>Имя</th>
         <th><img src="{% static 'icons/heart_0.png' %}" width="16"></th>
@@ -25,29 +19,31 @@
         <th><img src="{% static 'icons/user.png' %}" width="16"></th>
     </tr>
     </thead>
-    <tbody>
-    {% for snippet in object_list %}
-    <tr>
-<!--        <td>{{ snippet.creation_date|date:'d.m.y' }}</td>-->
-        <td>{{ snippet.lang }}</td>
-        <td>
-            <a href="{% url 'snippet_detail_page' snippet.slug %}">
-                {{ snippet.name }}
-            </a>
-        </td>
-        <td>{{ snippet.snippetlike_set.count }}</td>
-        <td>{{ snippet.comment_set.count }}</td>
-        <td>{{ snippet.author }}</td>
-    </tr>
-    {% empty %}
-    <tr>
-        Пока нет ни одного сниппета
-    </tr>
-    {% endfor %}
-    </tbody>
 </table>
 {% endblock %}
 
 {% block script %}
+<script>
+    $(document).ready( function () {
+        $('#snippets_table').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": "/ajax/snippet_non_private/json",
+            "columns": [
+                {"data": "creation_date"},
+                {"data": "lang"},
+                {"data": "name",
+                 "render": function(data, type, row, meta){
+                     data = '<a href="/snippets/' + row.slug + '">' + data + '</a>';
+                     return data;
+                 }
+                },
+                {"data": "like_count"},
+                {"data": "comment_count"},
+                {"data": "author"}
+            ],
+        });
+    });
+</script>
 {% endblock %}
 

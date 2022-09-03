@@ -6,9 +6,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
-from .models import Snippet, Comment, SnippetLike, SupportedLang
-from django.db.models import Count, Sum
+from .models import Snippet, Comment, SnippetLike
+from django.db.models import Count, Q
 from django.http import JsonResponse
+import math
 
 
 def index_page(request):
@@ -120,13 +121,6 @@ class SnippetDetailView(DetailView):
 class SnippetListView(ListView):
     model = Snippet
     template_name = 'pages/snippet_list.html'
-    queryset = Snippet.objects.all().annotate(
-        comment_count=Count('comment'),
-        like_count=Sum('snippetlike')
-    )
-
-    def get_queryset(self):
-        return self.model.objects.all().filter(is_private=False)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -138,7 +132,7 @@ class MySnippetListView(SnippetListView):
     template_name = 'pages/my_snippet_list.html'
 
     def get_queryset(self):
-        return self.model.objects.all().filter(author=self.request.user)
+        return self.model.objects.filter(author=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -174,10 +168,52 @@ def switch_snippetlike(request, snippet_id):
     return JsonResponse(response)
 
 
-def model_objects_json(model):
-    objects = model.objects.all()
-    data = [obj.to_dict_json() for obj in objects]
+def snippet_json(request, snippets=None):
+    if not snippets:
+        snippets = Snippet.objects.all()
+
+    total = snippets.count()
+
+    search = request.GET.get('search[value]')
+    if search:
+        snippets = snippets.filter(
+            Q(name__icontains=search) |
+            Q(lang__pk__icontains=search)
+        )
+
+    order_i = request.GET.get('order[0][column]')
+    order_col = request.GET.get(f'columns[{order_i}][data]')
+    order_dir = request.GET.get('order[0][dir]')
+    if order_i:
+        snippets = snippets.annotate(like_count=Count('snippetlike', distinct=True),
+                                     comment_count=Count('comment', distinct=True))\
+                           .order_by(f'{"-" if order_dir == "asc" else ""}{order_col}')
+    print(order_i)
+    print([(snippet.like_count, snippet.comment_count) for snippet in snippets])
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+
+        snippets = snippets[start:start + length]
+
+    data = [snippet.to_dict_json() for snippet in snippets]
     response = {
-        'data': data
+        'data': data,
+        'page': page,  # [opcional]
+        'per_page': per_page,  # [opcional]
+        'recordsTotal': total,
+        'recordsFiltered': total,
     }
     return JsonResponse(response)
+
+
+def snippet_json_non_private(request):
+    return snippet_json(request, Snippet.objects.filter(is_private=False))
+
+
+def snippet_json_user_is_author(request):
+    return snippet_json(request, Snippet.objects.filter(author=request.user))

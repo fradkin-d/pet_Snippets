@@ -14,43 +14,54 @@
         <th></th>
     </tr>
     </thead>
-    <tbody>
-    {% for snippet in object_list %}
-    <tr>
-        <td>{{ snippet.lang }}</td>
-        <td>
-            <a href="{% url 'snippet_detail_page' snippet.slug %}">
-                {{ snippet.name }}
-            </a>
-        </td>
-        <td>
-            {% if snippet.is_private %}
-            <img src="{% static 'icons/lock.png' %}" width="16">
-            {% endif %}
-        </td>
-        {% if snippet.is_private %}
-        <td></td>
-        <td></td>
-        {% else %}
-        <td>{{ snippet.snippetlike_set.count }}</td>
-        <td>{{ snippet.comment_set.count }}</td>
-        {% endif %}
-        <td>
-            <a href="{% url 'snippet_update_page' snippet.slug %}">
-                <img src="{% static 'icons/edit.png' %}" width="16">
-            </a>
-        </td>
-        <td>
-            <a href="{% url 'snippet_delete_page' snippet.slug %}">
-                <img src="{% static 'icons/delete.png' %}" width="16">
-            </a>
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="10">У Вас пока нет ни одного сниппета</td>
-    </tr>
-    {% endfor %}
-    </tbody>
 </table>
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready( function () {
+        $('#snippets_table').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": "/ajax/snippet_user_is_author/json",
+            "columns": [
+                {"data": "lang"},
+                {
+                    "data": "name",
+                    "render": function(data, type, row, meta){
+                        data = '<a href="/snippets/' + row.slug + '">' + data + '</a>';
+                        return data;
+                    }
+                },
+                {
+                    "data": "is_private",
+                    "render": function(data, type, row, meta){
+                        if (data) {
+                            data = '<img src={% static 'icons/lock.png' %} height=16>';
+                        } else {
+                            data = '';
+                        }
+                        return data
+                    }
+                },
+                {"data": "like_count"},
+                {"data": "comment_count"},
+                {
+                    "data": null,
+                    "render": function(data, type, row, meta){
+                        data = '<a href="/snippets/' + row.slug + '/update"><img src={% static 'icons/edit.png' %} height=16></a>';
+                        return data
+                    }
+                },
+                {
+                    "data": null,
+                    "render": function(data, type, row, meta){
+                        data = '<a href="/snippets/' + row.slug + '/delete"><img src={% static 'icons/delete.png' %} height=16></a>';
+                        return data
+                    }
+                }
+            ],
+        });
+    });
+</script>
 {% endblock %}

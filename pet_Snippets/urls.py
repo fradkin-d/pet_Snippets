@@ -35,5 +35,7 @@ urlpatterns = [
     path('comment/create', main_views.create_comment, name='create_comment'),
     path('comment/delete/<int:pk>', main_views.delete_comment, name='delete_comment'),
     path('ajax/switch_snippetlike/<int:snippet_id>', main_views.switch_snippetlike, name='switch_snippetlike'),
+    path('ajax/snippet_non_private/json', main_views.snippet_json_non_private, name='snippet_non_private_json'),
+    path('ajax/snippet_user_is_author/json', main_views.snippet_json_user_is_author, name='snippet_user_is_author_json'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

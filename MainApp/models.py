@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Count
 from django.utils.text import slugify
 import datetime as dt
 
@@ -23,6 +24,18 @@ class Snippet(models.Model):
     def save(self, *args, **kwargs):
         self.slug = '_'.join((slugify(self.name), dt.datetime.now().strftime('%d-%m-%y-%H-%M-%S')))
         super().save(*args, **kwargs)
+
+    def to_dict_json(self):
+        return {
+            'name': self.name,
+            'lang': self.lang.lang,
+            'creation_date': self.creation_date,
+            'author': self.author.username,
+            'like_count': self.like_count,
+            'comment_count': self.comment_count,
+            'is_private': self.is_private,
+            'slug': self.slug,
+        }
 
 
 class Comment(models.Model):
