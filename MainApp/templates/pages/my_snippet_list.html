@@ -5,6 +5,7 @@
 <table id="snippets_table" class="display">
     <thead>
     <tr>
+        <th>Дата</th>
         <th>Язык</th>
         <th>Имя</th>
         <th><img src="{% static 'icons/lock.png' %}" width="16"></th>
@@ -21,15 +22,39 @@
 <script>
     $(document).ready( function () {
         $('#snippets_table').DataTable({
+            language: {
+                url: '{% static 'json/datatables-russian.json' %}'
+            },
             "processing": true,
             "serverSide": true,
             "ajax": "/ajax/snippet_user_is_author/json",
             "columns": [
+                {
+                    "data": "creation_date",
+                    "render": function(data, type, row, meta){
+                        d = new Date(data);
+                        dd = '' + d.getDate();
+                        mm = '' + d.getMonth();
+                        yy = d.getFullYear();
+                        HH = '' + d.getHours();
+                        MM = '' + d.getMinutes();
+
+                        if (dd.length < 2) dd = '0' + dd;
+                        if (mm.length < 2) mm = '0' + mm;
+                        if (HH.length < 2) HH = '0' + HH;
+                        if (MM.length < 2) MM = '0' + MM;
+
+                        data = dd + '.' + mm + ' ' + yy + ' ' + HH + ':' + MM;
+                        return data;
+                    }
+                },
                 {"data": "lang"},
                 {
                     "data": "name",
                     "render": function(data, type, row, meta){
-                        data = '<a href="/snippets/' + row.slug + '">' + data + '</a>';
+                        name = data;
+                        if (name.length > 24) name = name.slice(0, 24) + '...';
+                        data = '<a href="/snippets/' + row.slug + '">' + name + '</a>';
                         return data;
                     }
                 },

@@ -168,10 +168,7 @@ def switch_snippetlike(request, snippet_id):
     return JsonResponse(response)
 
 
-def snippet_json(request, snippets=None):
-    if not snippets:
-        snippets = Snippet.objects.all()
-
+def snippet_json(request, snippets):
     total = snippets.count()
 
     search = request.GET.get('search[value]')
@@ -188,8 +185,6 @@ def snippet_json(request, snippets=None):
         snippets = snippets.annotate(like_count=Count('snippetlike', distinct=True),
                                      comment_count=Count('comment', distinct=True))\
                            .order_by(f'{"-" if order_dir == "asc" else ""}{order_col}')
-    print(order_i)
-    print([(snippet.like_count, snippet.comment_count) for snippet in snippets])
     _start = request.GET.get('start')
     _length = request.GET.get('length')
     if _start and _length:
