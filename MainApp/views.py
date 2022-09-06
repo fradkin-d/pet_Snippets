@@ -1,3 +1,4 @@
+from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.contrib import auth
@@ -9,6 +10,7 @@ from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from .models import Snippet, Comment, SnippetLike
 from django.db.models import Count, Q
 from django.http import JsonResponse
+from django.contrib import messages
 import math
 
 
@@ -23,9 +25,9 @@ def registration(request):
         form = form(request.POST)
         if form.is_valid():
             form.save()
-            # return Success message
+            messages.success(request, 'Регистрация прошла успешно!')
             return redirect('home')
-        # return Error message
+        messages.error(request, 'Ошибка регистрации! Проверьте правильность заполнения формы')
     context = {
         'pagename': 'Регистрация',
         'form': form,
@@ -40,41 +42,44 @@ def login(request):
         user = auth.authenticate(request, username=username, password=password)
         if user:
             auth.login(request, user)
-            # return Success message
+            messages.success(request, f'Добро пожаловать, {username}!')
         else:
-            # return Error message
-            pass
+            messages.error(request, 'Ошибка входа! Проверьте правильность заполнения формы')
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
 @login_required
 def logout(request):
     auth.logout(request)
+    messages.success(request, f'Выполнен выход')
     return redirect('home')
 
 
-class SnippetCreateView(CreateView):
+class SnippetCreateView(SuccessMessageMixin, CreateView):
     model = Snippet
     form_class = SnippetForm
     template_name = 'pages/add_snippet.html'
     success_url = reverse_lazy('my_snippets_list_page')
+    success_message = "Сниппет добавлен"
 
     def form_valid(self, form):
         form.instance.author_id = self.request.user.id
         return super().form_valid(form)
 
 
-class SnippetUpdateView(UpdateView):
+class SnippetUpdateView(SuccessMessageMixin, UpdateView):
     model = Snippet
     form_class = SnippetForm
     template_name = 'pages/snippet_update.html'
     success_url = reverse_lazy('my_snippets_list_page')
+    success_message = "Сниппет обновлен"
 
 
-class SnippetDeleteView(DeleteView):
+class SnippetDeleteView(SuccessMessageMixin, DeleteView):
     model = Snippet
     success_url = reverse_lazy('my_snippets_list_page')
     template_name = 'pages/snippet_delete.html'
+    success_message = "Сниппет удален"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
