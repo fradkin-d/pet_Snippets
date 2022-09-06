@@ -67,7 +67,7 @@ list-style-type: none;
     </tr>
     <tr>
         <th>Автор</th>
-        <td>{{ snippet.author }}</td>
+        <td>{{ snippet.author|truncatechars:30 }}</td>
     </tr>
 </table>
 

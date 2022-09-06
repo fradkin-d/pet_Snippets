@@ -53,23 +53,6 @@ def logout(request):
     return redirect('home')
 
 
-@login_required
-def add_snippet_page(request):
-    form = SnippetForm
-    if request.method == 'POST':
-        form = form(request.POST)
-        form.instance.author = request.user
-        if form.is_valid():
-            form.save()
-            # return Success message
-            return redirect('my_snippets_list_page')
-    context = {
-        'pagename': 'Добавление нового сниппета',
-        'form': form
-    }
-    return render(request, 'pages/add_snippet.html', context)
-
-
 class SnippetCreateView(CreateView):
     model = Snippet
     form_class = SnippetForm
@@ -118,26 +101,14 @@ class SnippetDetailView(DetailView):
         return context
 
 
-class SnippetListView(ListView):
-    model = Snippet
-    template_name = 'pages/snippet_list.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['pagename'] = 'База сниппетов'
-        return context
+def snippets_list(request):
+    context = {'pagename': 'База сниппетов'}
+    return render(request, 'pages/snippet_list.html', context)
 
 
-class MySnippetListView(SnippetListView):
-    template_name = 'pages/my_snippet_list.html'
-
-    def get_queryset(self):
-        return self.model.objects.filter(author=self.request.user)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['pagename'] = 'Мои сниппеты'
-        return context
+def user_snippets_list(request):
+    context = {'pagename': 'Мои сниппеты'}
+    return render(request, 'pages/my_snippet_list.html', context)
 
 
 def create_comment(request):
@@ -169,6 +140,10 @@ def switch_snippetlike(request, snippet_id):
 
 
 def snippet_json(request, snippets):
+    """
+    This function return JsonResponse with set of snippets and other info for datatable
+    require snippets queryset as 'snippets' parameter
+    """
     total = snippets.count()
 
     search = request.GET.get('search[value]')
@@ -207,8 +182,14 @@ def snippet_json(request, snippets):
 
 
 def snippet_json_non_private(request):
+    """
+    This function call snippet_json function with non-private snippets queryset as parameter
+    """
     return snippet_json(request, Snippet.objects.filter(is_private=False))
 
 
 def snippet_json_user_is_author(request):
+    """
+    This function call snippet_json function with user's snippets queryset as parameter
+    """
     return snippet_json(request, Snippet.objects.filter(author=request.user))

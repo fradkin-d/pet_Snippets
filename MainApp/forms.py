@@ -6,7 +6,7 @@ from MainApp.models import Snippet, Comment, SupportedLang
 
 
 class UserRegistrationForm(UserCreationForm):
-    username = forms.CharField(label='Имя пользователя', max_length=150)
+    username = forms.CharField(label='Имя пользователя', max_length=150)  # please, change max_length to 15!!!
     email = forms.EmailField(label='Адрес электронной почты')
 
     class Meta:
