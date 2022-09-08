@@ -3,20 +3,32 @@
 
 {% block head %}
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
+
+<link rel="stylesheet" type="text/css"
+      href="https://cdn.datatables.net/rowreorder/1.2.8/css/rowReorder.dataTables.min.css">
+<link rel="stylesheet" type="text/css"
+      href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.dataTables.min.css">
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
+
+<script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/rowreorder/1.2.8/js/dataTables.rowReorder.min.js"></script>
+<script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
 {% endblock %}
 
 {% block main %}
-<table id="snippets_table" class="display">
+<table id="snippets_table" class="display nowrap" style="width:100%">
     <thead>
     <tr>
-        <th>Дата</th>
         <th>Язык</th>
         <th>Имя</th>
         <th><img src="{% static 'icons/heart_0.png' %}" width="16"></th>
         <th><img src="{% static 'icons/comment.png' %}" width="16"></th>
         <th><img src="{% static 'icons/user.png' %}" width="16"></th>
+        <th>Дата</th>
     </tr>
     </thead>
 </table>
@@ -33,6 +45,25 @@
             "serverSide": true,
             "ajax": "/ajax/snippet_non_private/json",
             "columns": [
+                {
+                    "data": "name",
+                    "render": function(data, type, row, meta){
+                        name = data;
+                        if (name.length > 30) name = name.slice(0, 30) + '...';
+                        data = '<a href="/snippets/' + row.slug + '">' + name + '</a>';
+                        return data;
+                    }
+                },
+                {"data": "lang"},
+                {"data": "like_count"},
+                {"data": "comment_count"},
+                {
+                    "data": "author",
+                    "render": function(data, type, row, meta){
+                        if (data.length > 10) data = data.slice(0, 10) + '...';
+                        return data;
+                    }
+                },
                 {
                     "data": "creation_date",
                     "render": function(data, type, row, meta){
@@ -51,27 +82,16 @@
                         data = dd + '.' + mm + ' ' + yy + ' ' + HH + ':' + MM;
                         return data;
                     }
-                },
-                {"data": "lang"},
-                {
-                    "data": "name",
-                    "render": function(data, type, row, meta){
-                        name = data;
-                        if (name.length > 24) name = name.slice(0, 24) + '...';
-                        data = '<a href="/snippets/' + row.slug + '">' + name + '</a>';
-                        return data;
-                    }
-                },
-                {"data": "like_count"},
-                {"data": "comment_count"},
-                {
-                    "data": "author",
-                    "render": function(data, type, row, meta){
-                        if (data.length > 10) data = data.slice(0, 10) + '...';
-                        return data;
-                    }
                 }
             ],
+            columnDefs: [
+                { width: '0%', targets: [2, 3, 4] },
+                { width: '10%', targets: [1, 5] },
+            ],
+            rowReorder: {
+                selector: 'td:nth-child(2)'
+            },
+            responsive: true
         });
     });
 </script>

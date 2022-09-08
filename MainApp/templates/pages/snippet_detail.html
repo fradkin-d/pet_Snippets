@@ -47,6 +47,7 @@ list-style-type: none;
 .asteriskField {
     display: none;
 }
+
 </style>
 <link href="{% static 'css/pastie-theme.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
@@ -144,18 +145,20 @@ list-style-type: none;
     </ul>
 </div>
 <hr>
-{% if request.user.is_authenticated %}
 <div class="row">
     <div class="col">
+        {% if request.user.is_authenticated %}
         <form method="post" action="{% url 'create_comment' %}">
             {% csrf_token %}
             <input type="hidden" name='snippet' value="{{ snippet.id }}">
             {{ comment_form.text|as_crispy_field }}
             <input type="submit" class="btn btn-light mt-2" value="Отправить">
         </form>
+        {% else %}
+        Войдите, чтобы оставить комментарий
+        {% endif %}
     </div>
 </div>
-{% endif %}
 {% else %}
 <div class="row">
     <hr>
@@ -172,6 +175,7 @@ list-style-type: none;
 
 <script>
     window.snippetlike_url = "{% url 'switch_snippetlike' snippet.id %}"
+
 </script>
 
 <!-- Like button handling -->
@@ -200,5 +204,6 @@ list-style-type: none;
             }
         });
     });
+
 </script>
 {% endblock %}

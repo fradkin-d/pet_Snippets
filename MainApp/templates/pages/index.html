@@ -1,11 +1,73 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block main %}
 <div class="row">
-    <div class="col">
-        <p>Добро пожаловать!</p>
+    <div class="col" align="center">
+        <h3>Добро пожаловать!</h3>
         <p>На этом сайте ты можешь сохранить свои заготовки кода,
             а также поделиться ими с другими пользователями!</p>
+        <p><a href="{% url 'snippets_list_page' %}">Наша база</a> содержит {{ snippets_count }} сниппетов!</p>
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col-sm" align="center">
+        <hr>
+        <h4>Топ-10 сниппетов по рейтингу</h4>
+        <table class="table table-responsive">
+            <thead>
+            <tr>
+                <th>Язык</th>
+                <th>Автор</th>
+                <th>Имя</th>
+                <th><img src="{% static 'icons/heart_0.png' %}" width="16"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for snippet in top_ten_by_rating %}
+            <tr>
+                <td>{{ snippet.lang }}</td>
+                <td>{{ snippet.author|truncatechars:10 }}</td>
+                <td>
+                    <a href="{% url 'snippet_detail_page' snippet.slug %}">
+                       {{ snippet.name|truncatechars:30 }}
+                    </a>
+                </td>
+                <td>{{ snippet.likes }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <hr>
+    </div>
+    <div class="col-sm" align="center">
+        <hr>
+        <h4>Топ-10 сниппетов по обсуждаемости</h4>
+        <table class="table table-responsive">
+            <thead>
+            <tr>
+                <th>Язык</th>
+                <th>Автор</th>
+                <th>Имя</th>
+                <th><img src="{% static 'icons/comment.png' %}" width="16"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for snippet in top_ten_by_reviews %}
+            <tr>
+                <td>{{ snippet.lang }}</td>
+                <td>{{ snippet.author|truncatechars:10 }}</td>
+                <td>
+                    <a href="{% url 'snippet_detail_page' snippet.slug %}">
+                       {{ snippet.name|truncatechars:30 }}
+                    </a></td>
+                <td>{{ snippet.comments }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <hr>
     </div>
 </div>
 {% endblock %}

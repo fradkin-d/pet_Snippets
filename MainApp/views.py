@@ -1,22 +1,33 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib import auth, messages
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.contrib import auth
-from MainApp.forms import UserRegistrationForm, SnippetForm, CommentForm
-from django.contrib.auth.decorators import login_required
-from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
-from .models import Snippet, Comment, SnippetLike
 from django.db.models import Count, Q
 from django.http import JsonResponse
-from django.contrib import messages
 import math
+from MainApp.forms import UserRegistrationForm, SnippetForm, CommentForm
+from .models import Snippet, Comment, SnippetLike
 
 
 def index_page(request):
-    context = {'pagename': 'Snippets'}
+    context = {
+        'pagename': 'Snippets',
+        'snippets_count': Snippet.objects.all().count(),
+        'top_ten_by_rating': top_ten_by_rating(),
+        'top_ten_by_reviews': top_ten_by_reviews()
+    }
     return render(request, 'pages/index.html', context)
+
+
+def top_ten_by_rating():
+    return Snippet.objects.annotate(likes=Count('snippetlike')).filter(likes__gt=0).order_by('-likes')[:10]
+
+
+def top_ten_by_reviews():
+    return Snippet.objects.annotate(comments=Count('comment')).filter(comments__gt=0).order_by('-comments')[:10]
 
 
 def registration(request):
@@ -48,7 +59,6 @@ def login(request):
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
-@login_required
 def logout(request):
     auth.logout(request)
     messages.success(request, f'Выполнен выход')
@@ -116,6 +126,7 @@ def user_snippets_list(request):
     return render(request, 'pages/my_snippet_list.html', context)
 
 
+@login_required
 def create_comment(request):
     if request.method == 'POST':
         form = CommentForm(request.POST)
@@ -155,7 +166,8 @@ def snippet_json(request, snippets):
     if search:
         snippets = snippets.filter(
             Q(name__icontains=search) |
-            Q(lang__pk__icontains=search)
+            Q(lang__pk__icontains=search) |
+            Q(author__username__icontains=search)
         )
 
     order_i = request.GET.get('order[0][column]')
