@@ -155,7 +155,7 @@ list-style-type: none;
             <input type="submit" class="btn btn-light mt-2" value="Отправить">
         </form>
         {% else %}
-        Войдите, чтобы оставить комментарий
+        <a href="{% url 'login' %}?next={{ request.path|urlencode }}">Войдите</a>, чтобы оставить комментарий
         {% endif %}
     </div>
 </div>

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block main %}
+<form action="{% url 'login' %}" method="post" class="form-signin mb-4">
+    {% csrf_token %}
+    <div class="form-group row" align="center">
+        <div class="form-group col-md-4 mx-auto">
+            <label for="username">Логин</label>
+            <input name="username" class="form-control" id="username">
+            <label for="password">Пароль</label>
+            <input type="password" name="password" class="textinput textInput form-control" id="password">
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+            <input type="submit" class="btn btn-success mt-3" value="Войти">
+        </div>
+    </div>
+</form>
+<div align="center">
+    Еще не зарегистрированы? Пройдите <a href="{% url 'registration' %}">регистрацию</a> скорее!
+</div>
+{% endblock %}

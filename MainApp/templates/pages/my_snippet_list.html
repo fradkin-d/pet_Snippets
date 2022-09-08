@@ -43,7 +43,8 @@
                     "data": "name",
                     "render": function(data, type, row, meta){
                         name = data;
-                        if (name.length > 30) name = name.slice(0, 30) + '...';
+                        if (name.length > 30) name = name.slice(0, 30
+                        ) + '...';
                         data = '<a href="/snippets/' + row.slug + '">' + name + '</a>';
                         return data;
                     }

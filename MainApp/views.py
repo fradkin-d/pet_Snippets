@@ -23,10 +23,16 @@ def index_page(request):
 
 
 def top_ten_by_rating():
+    """
+    Returns top-10 snippets by rating
+    """
     return Snippet.objects.annotate(likes=Count('snippetlike')).filter(likes__gt=0).order_by('-likes')[:10]
 
 
 def top_ten_by_reviews():
+    """
+    Returns top-10 snippets by reviews
+    """
     return Snippet.objects.annotate(comments=Count('comment')).filter(comments__gt=0).order_by('-comments')[:10]
 
 
@@ -56,7 +62,11 @@ def login(request):
             messages.success(request, f'Добро пожаловать, {username}!')
         else:
             messages.error(request, 'Ошибка входа! Проверьте правильность заполнения формы')
+        next_url = request.POST.get('next')
+        if next_url:
+            return redirect(next_url, '/')
         return redirect(request.META.get('HTTP_REFERER', '/'))
+    return render(request, 'pages/login.html', {'pagename': 'Вход'})
 
 
 def logout(request):
@@ -126,7 +136,6 @@ def user_snippets_list(request):
     return render(request, 'pages/my_snippet_list.html', context)
 
 
-@login_required
 def create_comment(request):
     if request.method == 'POST':
         form = CommentForm(request.POST)
