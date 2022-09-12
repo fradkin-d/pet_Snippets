@@ -18,20 +18,21 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from MainApp import views as main_views
+from django.contrib.auth.decorators import login_required
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', main_views.index_page, name='home'),
-    path('registration', main_views.registration, name='registration'),
-    path('login', main_views.login, name='login'),
-    path('logout', main_views.logout, name='logout'),
-    path('snippets', main_views.snippets_list, name='snippets_list_page'),
+    path('accounts/registration/', main_views.registration, name='registration'),
+    path('accounts/login/', main_views.login, name='login'),
+    path('accounts/logout/', main_views.logout, name='logout'),
+    path('snippets/', main_views.snippets_list, name='snippets_list_page'),
     path('snippets/my_list', main_views.user_snippets_list, name='my_snippets_list_page'),
-    path('snippets/add', main_views.SnippetCreateView.as_view(), name='add_snippet_page'),
+    path('snippets/add', login_required(main_views.SnippetCreateView.as_view()), name='add_snippet_page'),
     path('snippets/<slug:slug>', main_views.SnippetDetailView.as_view(), name='snippet_detail_page'),
-    path('snippets/<slug:slug>/update', main_views.SnippetUpdateView.as_view(), name='snippet_update_page'),
-    path('snippets/<slug:slug>/delete', main_views.SnippetDeleteView.as_view(), name='snippet_delete_page'),
+    path('snippets/<slug:slug>/update', login_required(main_views.SnippetUpdateView.as_view()), name='snippet_update_page'),
+    path('snippets/<slug:slug>/delete', login_required(main_views.SnippetDeleteView.as_view()), name='snippet_delete_page'),
     path('comment/create', main_views.create_comment, name='create_comment'),
     path('comment/delete/<int:pk>', main_views.delete_comment, name='delete_comment'),
     path('ajax/switch_snippetlike/<int:snippet_id>', main_views.switch_snippetlike, name='switch_snippetlike'),

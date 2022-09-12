@@ -65,7 +65,7 @@ def login(request):
         next_url = request.POST.get('next')
         if next_url:
             return redirect(next_url, '/')
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+        return redirect('home')
     return render(request, 'pages/login.html', {'pagename': 'Вход'})
 
 
@@ -136,34 +136,6 @@ def user_snippets_list(request):
     return render(request, 'pages/my_snippet_list.html', context)
 
 
-def create_comment(request):
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        form.instance.author = request.user
-        form.instance.snippet = Snippet.objects.get(pk=request.POST.get('snippet'))
-        if form.is_valid():
-            form.save()
-            # return Success message
-    return redirect(request.META.get('HTTP_REFERER', '/'))
-
-
-def delete_comment(request, pk):
-    Comment.objects.get(pk=pk, author=request.user).delete()
-    return redirect(request.META.get('HTTP_REFERER', '/'))
-
-
-def switch_snippetlike(request, snippet_id):
-    snippet = Snippet.objects.get(pk=snippet_id)
-    response = {
-        'was_liked': SnippetLike.objects.filter(snippet=snippet, author=request.user).exists()
-    }
-    if response['was_liked']:
-        SnippetLike.objects.filter(snippet=snippet, author=request.user).delete()
-    else:
-        SnippetLike(snippet=snippet, author=request.user).save()
-    return JsonResponse(response)
-
-
 def snippet_json(request, snippets):
     """
     This function return JsonResponse with set of snippets and other info for datatable
@@ -184,26 +156,32 @@ def snippet_json(request, snippets):
     order_dir = request.GET.get('order[0][dir]')
     if order_i:
         snippets = snippets.annotate(like_count=Count('snippetlike', distinct=True),
-                                     comment_count=Count('comment', distinct=True))\
-                           .order_by(f'{"-" if order_dir == "asc" else ""}{order_col}')
+                                     comment_count=Count('comment', distinct=True)) \
+            .order_by(f'{"-" if order_dir == "asc" else ""}{order_col}')
     _start = request.GET.get('start')
     _length = request.GET.get('length')
+
+    data = [snippet.to_dict_json() for snippet in snippets]
+
+    response = {
+        'data': data,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+
     if _start and _length:
         start = int(_start)
         length = int(_length)
         page = math.ceil(start / length) + 1
         per_page = length
 
-        snippets = snippets[start:start + length]
-
-    data = [snippet.to_dict_json() for snippet in snippets]
-    response = {
-        'data': data,
-        'page': page,  # [opcional]
-        'per_page': per_page,  # [opcional]
-        'recordsTotal': total,
-        'recordsFiltered': total,
-    }
+        response.update(
+            {
+                'data': data[start:start + length],
+                'page': page,  # [opcional]
+                'per_page': per_page,  # [opcional]
+            }
+        )
     return JsonResponse(response)
 
 
@@ -214,8 +192,37 @@ def snippet_json_non_private(request):
     return snippet_json(request, Snippet.objects.filter(is_private=False))
 
 
+@login_required
 def snippet_json_user_is_author(request):
     """
     This function call snippet_json function with user's snippets queryset as parameter
     """
     return snippet_json(request, Snippet.objects.filter(author=request.user))
+
+
+@login_required(redirect_field_name=None)
+def create_comment(request):
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        form.instance.author = request.user
+        form.instance.snippet = Snippet.objects.get(pk=request.POST.get('snippet'))
+        if form.is_valid():
+            form.save()
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+def delete_comment(request, pk):
+    Comment.objects.get(pk=pk, author=request.user).delete()
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+def switch_snippetlike(request, snippet_id):
+    snippet = Snippet.objects.get(pk=snippet_id)
+    response = {
+        'was_liked': SnippetLike.objects.filter(snippet=snippet, author=request.user).exists()
+    }
+    if response['was_liked']:
+        SnippetLike.objects.filter(snippet=snippet, author=request.user).delete()
+    else:
+        SnippetLike(snippet=snippet, author=request.user).save()
+    return JsonResponse(response)

@@ -147,14 +147,13 @@ list-style-type: none;
 <hr>
 <div class="row">
     <div class="col">
-        {% if request.user.is_authenticated %}
         <form method="post" action="{% url 'create_comment' %}">
             {% csrf_token %}
             <input type="hidden" name='snippet' value="{{ snippet.id }}">
             {{ comment_form.text|as_crispy_field }}
             <input type="submit" class="btn btn-light mt-2" value="Отправить">
         </form>
-        {% else %}
+        {% if not request.user.is_authenticated %}
         <a href="{% url 'login' %}?next={{ request.path|urlencode }}">Войдите</a>, чтобы оставить комментарий
         {% endif %}
     </div>

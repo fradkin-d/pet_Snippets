@@ -29,10 +29,10 @@ class Snippet(models.Model):
         return {
             'name': self.name,
             'lang': self.lang.lang,
-            'creation_date': self.creation_date,
+            'creation_date': str(self.creation_date),
             'author': self.author.username,
-            'like_count': self.like_count,
-            'comment_count': self.comment_count,
+            'like_count': self.snippetlike_set.count(),
+            'comment_count': self.comment_set.count(),
             'is_private': self.is_private,
             'slug': self.slug,
         }
