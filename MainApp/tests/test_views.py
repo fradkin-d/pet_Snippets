@@ -6,33 +6,32 @@ import json
 
 
 class IndexPageViewTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        test_user = User.objects.create_user('TestUser')
-        test_lang = SupportedLang.objects.create(lang='TestLang')
+    def setUp(self) -> None:
+        self.user = User.objects.create_user('TestUser')
+        self.lang = SupportedLang.objects.create(lang='TestLang')
 
         number_of_public_snippets = 15
         for snippet_num in range(number_of_public_snippets):
             Snippet.objects.create(
                 name=f'Test Snippet {snippet_num}',
-                lang=test_lang,
+                lang=self.lang,
                 code='print("Test code")',
                 is_private=False,
-                author=test_user
+                author=self.user
             )
 
         for snippet in Snippet.objects.filter(is_private=False):
-            SnippetLike.objects.create(snippet=snippet, author=test_user)
-            Comment.objects.create(snippet=snippet, author=test_user, text='Test text')
+            SnippetLike.objects.create(snippet=snippet, author=self.user)
+            Comment.objects.create(snippet=snippet, author=self.user, text='Test text')
 
         number_of_private_snippets = 5
         for snippet_num in range(number_of_private_snippets):
             Snippet.objects.create(
                 name=f'Test Private Snippet {snippet_num}',
-                lang=test_lang,
+                lang=self.lang,
                 code='print("Test code")',
                 is_private=True,
-                author=test_user
+                author=self.user
             )
 
     def test_view_url_exists_at_desired_location(self):
@@ -202,10 +201,9 @@ class LogoutViewTest(TestCase):
 
 
 class SnippetCreateViewTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        User.objects.create_user(username='TestUser', password='Pa55w.rd')
-        SupportedLang.objects.create(lang='TestLang')
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
+        self.lang = SupportedLang.objects.create(lang='TestLang')
 
     def test_view_redirect_if_not_logged_in(self):
         response = self.client.get('/snippets/add')
@@ -235,16 +233,15 @@ class SnippetCreateViewTest(TestCase):
             reverse('add_snippet_page'),
             data={
                 'name': 'TestName',
-                'lang': SupportedLang.objects.get(lang='TestLang'),
+                'lang': self.lang,
                 'code': 'TestCode',
                 'is_private': False
             },
             follow=True
         )
         self.assertRedirects(response, '/snippets/my_list')
-        author = Snippet.objects.get(id=1).author
-        user = User.objects.get(username='TestUser')
-        self.assertEqual(author, user)
+        Snippet.objects.filter(author=self.user).exists()
+        self.assertTrue(Snippet.objects.filter(author=self.user).exists())
 
     def test_view_success_redirect(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
@@ -254,7 +251,7 @@ class SnippetCreateViewTest(TestCase):
             reverse('add_snippet_page'),
             data={
                 'name': 'TestName',
-                'lang': SupportedLang.objects.get(lang='TestLang'),
+                'lang': self.lang,
                 'code': 'TestCode',
                 'is_private': False
             },
@@ -268,52 +265,46 @@ class SnippetCreateViewTest(TestCase):
 
 
 class SnippetUpdateViewTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
-        lang = SupportedLang.objects.create(lang='TestLang')
-        Snippet.objects.create(
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
+        self.lang = SupportedLang.objects.create(lang='TestLang')
+        self.snippet = Snippet.objects.create(
             name='TestName',
-            lang=lang,
+            lang=self.lang,
             code='TestCode',
             is_private=False,
-            author=user
+            author=self.user
         )
 
     def test_view_redirect_if_not_logged_in(self):
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(f'/snippets/{snippet.slug}/update', follow=True)
-        self.assertRedirects(response, f'/accounts/login/?next=/snippets/{snippet.slug}/update')
+        response = self.client.get(f'/snippets/{self.snippet.slug}/update', follow=True)
+        self.assertRedirects(response, f'/accounts/login/?next=/snippets/{self.snippet.slug}/update')
 
     def test_view_logged_in_url_exists_at_desired_location(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(f'/snippets/{snippet.slug}/update')
+        response = self.client.get(f'/snippets/{self.snippet.slug}/update')
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(reverse('snippet_update_page', kwargs={'slug': snippet.slug}))
+        response = self.client.get(reverse('snippet_update_page', kwargs={'slug': self.snippet.slug}))
         self.assertEqual(response.status_code, 200)
 
     def test_view_uses_correct_template(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(reverse('snippet_update_page', kwargs={'slug': snippet.slug}))
+        response = self.client.get(reverse('snippet_update_page', kwargs={'slug': self.snippet.slug}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'pages/snippet_update.html')
 
     def test_view_success_redirect(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(reverse('snippet_update_page', kwargs={'slug': snippet.slug}))
+        response = self.client.get(reverse('snippet_update_page', kwargs={'slug': self.snippet.slug}))
         self.assertEqual(response.status_code, 200)
         response = self.client.post(
-            reverse('snippet_update_page', kwargs={'slug': snippet.slug}),
+            reverse('snippet_update_page', kwargs={'slug': self.snippet.slug}),
             data={
                 'name': 'TestNameUpdated',
-                'lang': SupportedLang.objects.get(lang='TestLang'),
+                'lang': self.lang,
                 'code': 'TestCodeUpdated',
                 'is_private': False
             },
@@ -327,49 +318,43 @@ class SnippetUpdateViewTest(TestCase):
 
 
 class SnippetDeleteViewTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
-        lang = SupportedLang.objects.create(lang='TestLang')
-        Snippet.objects.create(
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
+        self.lang = SupportedLang.objects.create(lang='TestLang')
+        self.snippet = Snippet.objects.create(
             name='TestName',
-            lang=lang,
+            lang=self.lang,
             code='TestCode',
             is_private=False,
-            author=user
+            author=self.user
         )
 
     def test_view_redirect_if_not_logged_in(self):
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(f'/snippets/{snippet.slug}/delete', follow=True)
-        self.assertRedirects(response, f'/accounts/login/?next=/snippets/{snippet.slug}/delete')
+        response = self.client.get(f'/snippets/{self.snippet.slug}/delete', follow=True)
+        self.assertRedirects(response, f'/accounts/login/?next=/snippets/{self.snippet.slug}/delete')
 
     def test_view_logged_in_url_exists_at_desired_location(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(f'/snippets/{snippet.slug}/delete')
+        response = self.client.get(f'/snippets/{self.snippet.slug}/delete')
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(reverse('snippet_delete_page', kwargs={'slug': snippet.slug}))
+        response = self.client.get(reverse('snippet_delete_page', kwargs={'slug': self.snippet.slug}))
         self.assertEqual(response.status_code, 200)
 
     def test_view_uses_correct_template(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(reverse('snippet_delete_page', kwargs={'slug': snippet.slug}))
+        response = self.client.get(reverse('snippet_delete_page', kwargs={'slug': self.snippet.slug}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'pages/snippet_delete.html')
 
     def test_view_success_redirect(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(reverse('snippet_delete_page', kwargs={'slug': snippet.slug}))
+        response = self.client.get(reverse('snippet_delete_page', kwargs={'slug': self.snippet.slug}))
         self.assertEqual(response.status_code, 200)
         response = self.client.post(
-            reverse('snippet_delete_page', kwargs={'slug': snippet.slug}),
+            reverse('snippet_delete_page', kwargs={'slug': self.snippet.slug}),
             follow=True
         )
         self.assertRedirects(response, '/snippets/my_list')
@@ -380,37 +365,32 @@ class SnippetDeleteViewTest(TestCase):
 
 
 class SnippetDetailViewTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
-        lang = SupportedLang.objects.create(lang='TestLang')
-        Snippet.objects.create(
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
+        self.lang = SupportedLang.objects.create(lang='TestLang')
+        self.snippet = Snippet.objects.create(
             name='TestName',
-            lang=lang,
+            lang=self.lang,
             code='TestCode',
             is_private=False,
-            author=user
+            author=self.user
         )
 
     def test_view_url_exists_at_desired_location(self):
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(f'/snippets/{snippet.slug}')
+        response = self.client.get(f'/snippets/{self.snippet.slug}')
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(reverse('snippet_detail_page', kwargs={'slug': snippet.slug}))
+        response = self.client.get(reverse('snippet_detail_page', kwargs={'slug': self.snippet.slug}))
         self.assertEqual(response.status_code, 200)
 
     def test_view_uses_correct_template(self):
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(reverse('snippet_detail_page', kwargs={'slug': snippet.slug}))
+        response = self.client.get(reverse('snippet_detail_page', kwargs={'slug': self.snippet.slug}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'pages/snippet_detail.html')
 
     def test_view_anon_user_have_full_context(self):
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(reverse('snippet_detail_page', kwargs={'slug': snippet.slug}))
+        response = self.client.get(reverse('snippet_detail_page', kwargs={'slug': self.snippet.slug}))
         self.assertEqual(response.status_code, 200)
         self.assertTrue('pagename' in response.context)
         self.assertTrue('user' in response.context)
@@ -420,8 +400,7 @@ class SnippetDetailViewTest(TestCase):
 
     def test_view_logged_in_have_full_context(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(reverse('snippet_detail_page', kwargs={'slug': snippet.slug}))
+        response = self.client.get(reverse('snippet_detail_page', kwargs={'slug': self.snippet.slug}))
         self.assertEqual(response.status_code, 200)
         self.assertTrue('pagename' in response.context)
         self.assertTrue('user' in response.context)
@@ -471,23 +450,22 @@ class UserSnippetsListViewTest(TestCase):
 
 
 class SnippetJsonNonPrivateViewTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
-        lang = SupportedLang.objects.create(lang='TestLang')
-        Snippet.objects.create(
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
+        self.lang = SupportedLang.objects.create(lang='TestLang')
+        self.snippet_1 = Snippet.objects.create(
             name='TestName 1',
-            lang=lang,
+            lang=self.lang,
             code='TestCode 1',
             is_private=False,
-            author=user
+            author=self.user
         )
-        Snippet.objects.create(
+        self.snippet_2 = Snippet.objects.create(
             name='TestName 2',
-            lang=lang,
+            lang=self.lang,
             code='TestCode 2',
             is_private=False,
-            author=user
+            author=self.user
         )
 
     def test_view_url_exists_at_desired_location(self):
@@ -513,24 +491,23 @@ class SnippetJsonNonPrivateViewTest(TestCase):
 
 
 class SnippetJsonUserIsAuthorViewTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
-        user2 = User.objects.create_user(username='TestUser2', password='Pa55w.rd')
-        lang = SupportedLang.objects.create(lang='TestLang')
-        Snippet.objects.create(
+    def setUp(self) -> None:
+        self.user_1 = User.objects.create_user(username='TestUser', password='Pa55w.rd')
+        self.user_2 = User.objects.create_user(username='TestUser2', password='Pa55w.rd')
+        self.lang = SupportedLang.objects.create(lang='TestLang')
+        self.snippet_1 = Snippet.objects.create(
             name='TestName 1',
-            lang=lang,
+            lang=self.lang,
             code='TestCode 1',
             is_private=False,
-            author=user
+            author=self.user_1
         )
-        Snippet.objects.create(
+        self.snippet_2 = Snippet.objects.create(
             name='TestName 2',
-            lang=lang,
+            lang=self.lang,
             code='TestCode 2',
             is_private=False,
-            author=user2
+            author=self.user_2
         )
 
     def test_view_url_exists_at_desired_location(self):
@@ -540,14 +517,12 @@ class SnippetJsonUserIsAuthorViewTest(TestCase):
 
     def test_view_url_accessible_by_name(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-
         response = self.client.get(reverse('snippet_user_is_author_json'))
         self.assertEqual(response.status_code, 200)
 
     def test_json_response(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        user = User.objects.get(pk=1)
-        snippets = Snippet.objects.filter(author=user)
+        snippets = Snippet.objects.filter(author=self.user_1)
         json_response = self.client.get(reverse('snippet_user_is_author_json'))
 
         json_response_params = json.loads(json_response.content).keys()
@@ -561,16 +536,15 @@ class SnippetJsonUserIsAuthorViewTest(TestCase):
 
 
 class CreateCommentViewTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
-        lang = SupportedLang.objects.create(lang='TestLang')
-        Snippet.objects.create(
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
+        self.lang = SupportedLang.objects.create(lang='TestLang')
+        self.snippet = Snippet.objects.create(
             name='TestName',
-            lang=lang,
+            lang=self.lang,
             code='TestCode',
             is_private=False,
-            author=user
+            author=self.user
         )
 
     def test_view_redirect_if_not_logged_in(self):
@@ -579,93 +553,80 @@ class CreateCommentViewTest(TestCase):
 
     def test_view_url_exists_at_desired_location(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.post('/comment/create', {'snippet': snippet.id, 'text': 'TestText'}, follow=True)
+        response = self.client.post('/comment/create', {'snippet': self.snippet.id, 'text': 'TestText'}, follow=True)
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.post(reverse('create_comment'), {'snippet': snippet.id, 'text': 'TestText'}, follow=True)
+        response = self.client.post(reverse('create_comment'), {'snippet': self.snippet.id, 'text': 'TestText'}, follow=True)
         self.assertEqual(response.status_code, 200)
 
     def test_view_create_comment(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        self.client.post(reverse('create_comment'), {'snippet': snippet.id, 'text': 'TestText'})
-        self.assertTrue(Comment.objects.filter(snippet=snippet).exists())
+        self.client.post(reverse('create_comment'), {'snippet': self.snippet.id, 'text': 'TestText'})
+        self.assertTrue(Comment.objects.filter(snippet=self.snippet).exists())
 
 
 class DeleteCommentViewTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
-        lang = SupportedLang.objects.create(lang='TestLang')
-        snippet = Snippet.objects.create(
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
+        self.lang = SupportedLang.objects.create(lang='TestLang')
+        self.snippet = Snippet.objects.create(
             name='TestName',
-            lang=lang,
+            lang=self.lang,
             code='TestCode',
             is_private=False,
-            author=user
+            author=self.user
         )
-        Comment.objects.create(
-            snippet=snippet,
-            author=user,
+        self.comment = Comment.objects.create(
+            snippet=self.snippet,
+            author=self.user,
             text='TestText'
         )
 
     def test_view_url_exists_at_desired_location(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        comment = Comment.objects.get(id=1)
-        response = self.client.get(f'/comment/delete/{comment.id}', follow=True)
+        response = self.client.get(f'/comment/delete/{self.comment.id}', follow=True)
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        comment = Comment.objects.get(id=1)
-        response = self.client.get(reverse('delete_comment', kwargs={'pk': comment.id}), follow=True)
+        response = self.client.get(reverse('delete_comment', kwargs={'pk': self.comment.id}), follow=True)
         self.assertEqual(response.status_code, 200)
 
     def test_view_delete_comment(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        comment = Snippet.objects.get(id=1)
-        self.client.get(reverse('delete_comment', kwargs={'pk': comment.id}))
-        self.assertFalse(Comment.objects.filter(snippet=snippet).exists())
+        self.client.get(reverse('delete_comment', kwargs={'pk': self.comment.id}))
+        self.assertFalse(Comment.objects.filter(snippet=self.snippet).exists())
 
 
 class SwitchSnippetlikeViewTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
-        lang = SupportedLang.objects.create(lang='TestLang')
-        snippet = Snippet.objects.create(
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(username='TestUser', password='Pa55w.rd')
+        self.lang = SupportedLang.objects.create(lang='TestLang')
+        self.snippet = Snippet.objects.create(
             name='TestName',
-            lang=lang,
+            lang=self.lang,
             code='TestCode',
             is_private=False,
-            author=user
+            author=self.user
         )
 
     def test_view_url_exists_at_desired_location(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(f'/ajax/switch_snippetlike/{snippet.id}')
+        response = self.client.get(f'/ajax/switch_snippetlike/{self.snippet.id}')
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        response = self.client.get(reverse('switch_snippetlike', kwargs={'snippet_id': snippet.id}))
+        response = self.client.get(reverse('switch_snippetlike', kwargs={'snippet_id': self.snippet.id}))
         self.assertEqual(response.status_code, 200)
 
     def test_view_create_and_delete_snippetlike(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        snippet = Snippet.objects.get(id=1)
-        user = User.objects.get(id=1)
-        self.client.get(reverse('switch_snippetlike', kwargs={'snippet_id': snippet.id}))
-        self.assertTrue(SnippetLike.objects.filter(snippet=snippet, author=user).exists())
+        self.client.get(reverse('switch_snippetlike', kwargs={'snippet_id': self.snippet.id}))
+        self.assertTrue(SnippetLike.objects.filter(snippet=self.snippet, author=self.user).exists())
 
-        self.client.get(reverse('switch_snippetlike', kwargs={'snippet_id': snippet.id}))
-        self.assertFalse(SnippetLike.objects.filter(snippet=snippet, author=user).exists())
+        self.client.get(reverse('switch_snippetlike', kwargs={'snippet_id': self.snippet.id}))
+        self.assertFalse(SnippetLike.objects.filter(snippet=self.snippet, author=self.user).exists())
 
