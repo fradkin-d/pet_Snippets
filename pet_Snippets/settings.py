@@ -31,15 +31,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-z&bq0+x8ml088!q37p!uo)@dpol!8veq!+-roc+uzfh^dy5apw'
-)
+SECRET_KEY = os.getenv('DJANGO_SECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ.get('DJANGO_DEBUG', True))
+DEBUG = bool(os.getenv('DJANGO_DEBUG'))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    os.getenv('DJANGO_ADDRESS'),
+    os.getenv('DJANGO_DOMAIN'),
+    'localhost']
 
 
 # Application definition
@@ -142,8 +142,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, '../static/')
+STATIC_URL = 'static/'
+STATIC_ROOT = '/home/dk/static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -151,7 +151,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, '../static/')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATICFILES_DIRS = [
-    BASE_DIR / "static"
+    BASE_DIR / "static/"
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

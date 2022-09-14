@@ -14,7 +14,7 @@ from .models import Snippet, Comment, SnippetLike
 
 def index_page(request):
     context = {
-        'pagename': 'Snippets',
+        'pagename': '',
         'snippets_count': Snippet.objects.all().count(),
         'top_ten_by_rating': top_ten_by_rating(),
         'top_ten_by_reviews': top_ten_by_reviews()
@@ -43,7 +43,6 @@ def registration(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Регистрация прошла успешно!')
-            print(form)
             new_user = auth.authenticate(username=form.cleaned_data['username'],
                                          password=form.cleaned_data['password1'])
             auth.login(request, new_user)
