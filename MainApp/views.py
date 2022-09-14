@@ -43,6 +43,11 @@ def registration(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Регистрация прошла успешно!')
+            print(form)
+            new_user = auth.authenticate(username=form.cleaned_data['username'],
+                                         password=form.cleaned_data['password1'])
+            auth.login(request, new_user)
+            messages.success(request, f'Добро пожаловать, {new_user.username}!')
             return redirect('home')
         messages.error(request, 'Ошибка регистрации! Проверьте правильность заполнения формы')
     context = {
@@ -60,12 +65,12 @@ def login(request):
         if user:
             auth.login(request, user)
             messages.success(request, f'Добро пожаловать, {username}!')
+            next_url = request.POST.get('next')
+            if next_url:
+                return redirect(next_url, '/')
+            return redirect('home')
         else:
             messages.error(request, 'Ошибка входа! Проверьте правильность заполнения формы')
-        next_url = request.POST.get('next')
-        if next_url:
-            return redirect(next_url, '/')
-        return redirect('home')
     return render(request, 'pages/login.html', {'pagename': 'Вход'})
 
 
