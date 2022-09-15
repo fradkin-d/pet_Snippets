@@ -150,7 +150,7 @@ def snippet_json(request, snippets):
     This function return JsonResponse with set of snippets and other info for datatable
     require snippets queryset as 'snippets' parameter
     """
-    total = snippets.count()
+    response = {'recordsTotal': snippets.count()}
 
     search = request.GET.get('search[value]')
     if search:
@@ -164,33 +164,24 @@ def snippet_json(request, snippets):
     order_col = request.GET.get(f'columns[{order_i}][data]')
     order_dir = request.GET.get('order[0][dir]')
     if order_i:
-        snippets = snippets.annotate(like_count=Count('snippetlike', distinct=True),
-                                     comment_count=Count('comment', distinct=True)) \
+        snippets = snippets\
+            .annotate(like_count=Count('snippetlike', distinct=True),
+                      comment_count=Count('comment', distinct=True))\
             .order_by(f'{"-" if order_dir == "asc" else ""}{order_col}')
-    _start = request.GET.get('start')
-    _length = request.GET.get('length')
 
-    data = [snippet.to_dict_json() for snippet in snippets]
+    response.update({'recordsFiltered': snippets.count()})
 
-    response = {
-        'data': data,
-        'recordsTotal': total,
-        'recordsFiltered': total,
-    }
-
-    if _start and _length:
-        start = int(_start)
-        length = int(_length)
-        page = math.ceil(start / length) + 1
-        per_page = length
-
-        response.update(
-            {
-                'data': data[start:start + length],
-                'page': page,  # [opcional]
-                'per_page': per_page,  # [opcional]
-            }
-        )
+    start, length = int(request.GET.get('start')), int(request.GET.get('length'))
+    if start and length:
+        response.update({
+            'data': [snippet.to_dict_json() for snippet in snippets[start:start + length-1]],
+            'page': math.ceil(start / length) + 1,
+            'per_page': length,
+        })
+    else:
+        response.update({
+            'data': [snippet.to_dict_json() for snippet in snippets]
+        })
     return JsonResponse(response)
 
 
