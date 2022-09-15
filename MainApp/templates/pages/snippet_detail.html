@@ -93,9 +93,10 @@ list-style-type: none;
 <div class="row">
     <div class="col">
         <pre>
-            <code data-language="{{ snippet.lang }}">{{ snippet.code}}</code>
-        <button onclick="CopyToClipboard()"
-                class="btn btn-outline-secondary btn-sm position-absolute top-0 end-0 m-1">Ctrl+C</button>
+            <code data-language="{{ snippet.lang }}" id="copy-code">{{ snippet.code}}</code>
+            <button onclick="CopyToClipboard()"
+                    id="copy-button"
+                    class="btn btn-outline-secondary btn-sm position-absolute top-0 end-0 m-1">Ctrl+C</button>
         </pre>
     </div>
 </div>
@@ -194,7 +195,6 @@ list-style-type: none;
 
 <script>
     window.snippetlike_url = "{% url 'switch_snippetlike' snippet.id %}"
-
 </script>
 
 <!-- Like button handling -->
@@ -223,6 +223,23 @@ list-style-type: none;
             }
         });
     });
+</script>
 
+<!-- Ctrl+C button handling -->
+<script>
+    function CopyToClipboard() {
+        // Copy text
+        var r = document.createRange();
+        r.selectNode(document.getElementById('copy-code'));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(r);
+        document.execCommand('copy');
+        window.getSelection().removeAllRanges();
+
+        // Change copy button
+        var button = document.getElementById('copy-button');
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+    }
 </script>
 {% endblock %}
