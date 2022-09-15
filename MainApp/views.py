@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import auth, messages
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django.db.models import Count, Q
@@ -90,13 +90,18 @@ class SnippetCreateView(SuccessMessageMixin, CreateView):
         form.instance.author_id = self.request.user.id
         return super().form_valid(form)
 
+    def get_success_url(self):
+        return reverse('snippet_detail_page', args=(self.object.slug,))
+
 
 class SnippetUpdateView(SuccessMessageMixin, UpdateView):
     model = Snippet
     form_class = SnippetForm
     template_name = 'pages/snippet_update.html'
-    success_url = reverse_lazy('my_snippets_list_page')
     success_message = "Сниппет обновлен"
+
+    def get_success_url(self):
+        return self.request.GET.get('next')
 
 
 class SnippetDeleteView(SuccessMessageMixin, DeleteView):

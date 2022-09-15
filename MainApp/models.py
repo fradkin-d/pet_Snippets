@@ -14,6 +14,7 @@ class SupportedLang(models.Model):
 class Snippet(models.Model):
     name = models.CharField(max_length=100)
     lang = models.ForeignKey(SupportedLang, on_delete=models.CASCADE)
+    description = models.CharField(max_length=250, default='')
     code = models.TextField(max_length=5000)
     creation_date = models.DateTimeField(auto_now_add=True)
     is_private = models.BooleanField()
@@ -21,7 +22,8 @@ class Snippet(models.Model):
     slug = models.SlugField(unique=True, default=None)
 
     def save(self, *args, **kwargs):
-        self.slug = '_'.join((slugify(self.name), dt.datetime.now().strftime('%d-%m-%y-%H-%M-%S')))
+        if not self.slug:
+            self.slug = '_'.join((slugify(self.name), dt.datetime.now().strftime('%d-%m-%y-%H-%M-%S')))
         super().save(*args, **kwargs)
 
     def to_dict_json(self):

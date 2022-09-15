@@ -1,14 +1,14 @@
 {% load static %}
 {% load crispy_forms_tags %}
 <header>
-    <nav class="navbar fixed-top navbar-expand-sm bg-light">
+    <nav class="navbar fixed-top navbar-expand-sm bg-dark navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">
                 <img src="{% static 'images/logo.png' %}" width="32" height="32" alt="">
                 <strong>n i p p e t s</strong>
             </a>
             <div class="dropdown">
-                <button class="btn dropdown-toggle" type="button"
+                <button class="btn btn-dark dropdown-toggle" type="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
                     {% if request.user.is_authenticated %}
                     {% if request.user.username|length > 15 %}

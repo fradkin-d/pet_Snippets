@@ -48,34 +48,54 @@ list-style-type: none;
     display: none;
 }
 
+
 </style>
 <link href="{% static 'css/pastie-theme.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block main %}
-<table class="table">
-    <tr>
-        <th>Имя</th>
-        <td>{{ snippet.name }}</td>
-    </tr>
-    <tr>
-        <th>Язык</th>
-        <td>{{ snippet.lang }}</td>
-    </tr>
-    <tr>
-        <th>Дата</th>
-        <td>{{ snippet.creation_date|date:'d.m.y H:i' }}</td>
-    </tr>
-    <tr>
-        <th>Автор</th>
-        <td>{{ snippet.author|truncatechars:30 }}</td>
-    </tr>
-</table>
-
+<div class="row">
+    <div class="col-sm">
+        <table class="table table-borderless">
+            <tr class="border-bottom">
+                <th>Имя</th>
+                <td>{{ snippet.name }}</td>
+            </tr>
+            <tr class="border-bottom">
+                <th>Язык</th>
+                <td>{{ snippet.lang }}</td>
+            </tr>
+            <tr class="border-bottom">
+                <th>Дата</th>
+                <td>{{ snippet.creation_date|date:'d.m.y H:i' }}</td>
+            </tr>
+            <tr>
+                <th>Автор</th>
+                <td>{{ snippet.author|truncatechars:30 }}</td>
+            </tr>
+        </table>
+    </div>
+    <div class="col-sm">
+        <table class="table table-borderless">
+            <thead class="border-bottom">
+                <tr>
+                    <th>Описание</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ snippet.description }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 <div class="row">
     <div class="col">
         <pre>
             <code data-language="{{ snippet.lang }}">{{ snippet.code}}</code>
+        <button onclick="CopyToClipboard()"
+                class="btn btn-outline-secondary btn-sm position-absolute top-0 end-0 m-1">Ctrl+C</button>
         </pre>
     </div>
 </div>
@@ -100,7 +120,7 @@ list-style-type: none;
     </div>
     {% if snippet.author == user %}
     <div class="col-2">
-        <a href="{% url 'snippet_update_page' snippet.slug %}">
+        <a href="{% url 'snippet_update_page' snippet.slug %}?next={{ request.path }}">
             <img src="{% static 'icons/edit.png' %}" width="16">
         </a>
     </div>
