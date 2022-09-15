@@ -58,19 +58,19 @@ list-style-type: none;
     <div class="col-sm">
         <table class="table table-borderless">
             <tr class="border-bottom">
-                <th>Имя</th>
+                <th class="table-light">Имя</th>
                 <td>{{ snippet.name }}</td>
             </tr>
             <tr class="border-bottom">
-                <th>Язык</th>
+                <th class="table-light">Язык</th>
                 <td>{{ snippet.lang }}</td>
             </tr>
             <tr class="border-bottom">
-                <th>Дата</th>
+                <th class="table-light">Дата</th>
                 <td>{{ snippet.creation_date|date:'d.m.y H:i' }}</td>
             </tr>
             <tr>
-                <th>Автор</th>
+                <th class="table-light">Автор</th>
                 <td>{{ snippet.author|truncatechars:30 }}</td>
             </tr>
         </table>
@@ -79,7 +79,7 @@ list-style-type: none;
         <table class="table table-borderless">
             <thead class="border-bottom">
                 <tr>
-                    <th>Описание</th>
+                    <th class="table-light">Описание</th>
                 </tr>
             </thead>
             <tbody>
