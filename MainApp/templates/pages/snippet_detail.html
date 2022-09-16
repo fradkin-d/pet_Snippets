@@ -181,6 +181,20 @@ list-style-type: none;
 </div>
 {% else %}
 <div class="row">
+    {% if snippet.author == user %}
+    <div class="col-2">
+        <a href="{% url 'snippet_update_page' snippet.slug %}?next={{ request.path }}">
+            <img src="{% static 'icons/edit.png' %}" width="16">
+        </a>
+    </div>
+    <div class="col-2">
+        <a href="{% url 'snippet_delete_page' snippet.slug %}">
+            <img src="{% static 'icons/delete.png' %}" width="16">
+        </a>
+    </div>
+    {% endif %}
+</div>
+<div class="row">
     <hr>
     <div class="col-4" align="center">
         Приватный сниппет комментировать нельзя
