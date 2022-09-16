@@ -19,7 +19,7 @@ class Snippet(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     is_private = models.BooleanField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    slug = models.SlugField(unique=True, default=None)
+    slug = models.SlugField(unique=True, default=None, max_length=150)
 
     def save(self, *args, **kwargs):
         if not self.slug:
