@@ -1,19 +1,17 @@
-import json
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import auth, messages
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.http import JsonResponse
 import math
 from MainApp.forms import UserRegistrationForm, SnippetForm, CommentForm
 from .models import Snippet, Comment, SnippetLike
 from django.db import connection
-from pprint import pprint as pp
 
 
 def index_page(request):
@@ -125,6 +123,13 @@ class SnippetDetailView(DetailView):
     model = Snippet
     template_name = 'pages/snippet_detail.html'
     context_object_name = 'snippet'
+
+    def dispatch(self, request, *args, **kwargs):
+        _object = self.get_object()
+        _user = self.request.user
+        if _object.is_private is True and _object.author != _user:
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
