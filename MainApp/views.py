@@ -28,14 +28,14 @@ def top_ten_by_rating():
     """
     Returns top-10 snippets by rating
     """
-    return Snippet.objects.annotate(likes=Count('snippetlike')).filter(likes__gt=0).order_by('-likes')[:10]
+    return Snippet.objects.filter(is_private=False).annotate(likes=Count('snippetlike')).filter(likes__gt=0).order_by('-likes')[:10]
 
 
 def top_ten_by_reviews():
     """
     Returns top-10 snippets by reviews
     """
-    return Snippet.objects.annotate(comments=Count('comment')).filter(comments__gt=0).order_by('-comments')[:10]
+    return Snippet.objects.filter(is_private=False).annotate(comments=Count('comment')).filter(comments__gt=0).order_by('-comments')[:10]
 
 
 def registration(request):
