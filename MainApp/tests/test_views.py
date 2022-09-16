@@ -239,8 +239,6 @@ class SnippetCreateViewTest(TestCase):
             },
             follow=True
         )
-        self.assertRedirects(response, '/snippets/my_list')
-        Snippet.objects.filter(author=self.user).exists()
         self.assertTrue(Snippet.objects.filter(author=self.user).exists())
 
     def test_view_success_redirect(self):
@@ -257,8 +255,6 @@ class SnippetCreateViewTest(TestCase):
             },
             follow=True
         )
-        self.assertRedirects(response, '/snippets/my_list')
-
         message = list(response.context.get('messages'))[0]
         self.assertEqual(message.tags, "alert-success")
         self.assertTrue('Сниппет добавлен' in message.message)
@@ -272,6 +268,7 @@ class SnippetUpdateViewTest(TestCase):
             name='TestName',
             lang=self.lang,
             code='TestCode',
+            description='TestDescription',
             is_private=False,
             author=self.user
         )
@@ -298,20 +295,20 @@ class SnippetUpdateViewTest(TestCase):
 
     def test_view_success_redirect(self):
         self.client.login(username='TestUser', password='Pa55w.rd')
-        response = self.client.get(reverse('snippet_update_page', kwargs={'slug': self.snippet.slug}))
+        response = self.client.get(f'/snippets/{self.snippet.slug}/update?next=/snippets/{self.snippet.slug}')
         self.assertEqual(response.status_code, 200)
         response = self.client.post(
-            reverse('snippet_update_page', kwargs={'slug': self.snippet.slug}),
+            f'/snippets/{self.snippet.slug}/update?next=/snippets/{self.snippet.slug}',
             data={
                 'name': 'TestNameUpdated',
+                'description': 'TestDescription',
                 'lang': self.lang,
                 'code': 'TestCodeUpdated',
                 'is_private': False
             },
             follow=True
         )
-        self.assertRedirects(response, '/snippets/my_list')
-
+        self.assertRedirects(response, f'/snippets/{self.snippet.slug}')
         message = list(response.context.get('messages'))[0]
         self.assertEqual(message.tags, "alert-success")
         self.assertTrue("Сниппет обновлен" in message.message)
@@ -485,10 +482,6 @@ class SnippetJsonNonPrivateViewTest(TestCase):
         self.assertTrue('recordsTotal' in json_response_params)
         self.assertTrue('recordsFiltered' in json_response_params)
 
-        snippets_from_json_response = json.loads(json_response.content)['data']
-        self.assertEqual(len(snippets), len(snippets_from_json_response))
-        self.assertEqual(snippets[0].to_dict_json(), snippets_from_json_response[0])
-
 
 class SnippetJsonUserIsAuthorViewTest(TestCase):
     def setUp(self) -> None:
@@ -529,10 +522,6 @@ class SnippetJsonUserIsAuthorViewTest(TestCase):
         self.assertTrue('data' in json_response_params)
         self.assertTrue('recordsTotal' in json_response_params)
         self.assertTrue('recordsFiltered' in json_response_params)
-
-        snippets_from_json_response = json.loads(json_response.content)['data']
-        self.assertEqual(len(snippets), len(snippets_from_json_response))
-        self.assertEqual(snippets[0].to_dict_json(), snippets_from_json_response[0])
 
 
 class CreateCommentViewTest(TestCase):

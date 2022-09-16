@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import auth, messages
@@ -10,6 +12,8 @@ from django.http import JsonResponse
 import math
 from MainApp.forms import UserRegistrationForm, SnippetForm, CommentForm
 from .models import Snippet, Comment, SnippetLike
+from django.db import connection
+from pprint import pprint as pp
 
 
 def index_page(request):
@@ -145,59 +149,46 @@ def user_snippets_list(request):
     return render(request, 'pages/my_snippet_list.html', context)
 
 
-def snippet_json(request, snippets):
-    """
-    This function return JsonResponse with set of snippets and other info for datatable
-    require snippets queryset as 'snippets' parameter
-    """
-    response = {'recordsTotal': snippets.count()}
-
+def snippets_json(request, username=''):
     search = request.GET.get('search[value]')
-    if search:
-        snippets = snippets.filter(
-            Q(name__icontains=search) |
-            Q(lang__pk__icontains=search) |
-            Q(author__username__icontains=search)
-        )
-
     order_i = request.GET.get('order[0][column]')
     order_col = request.GET.get(f'columns[{order_i}][data]')
     order_dir = request.GET.get('order[0][dir]')
-    if order_i:
-        snippets = snippets\
-            .annotate(like_count=Count('snippetlike', distinct=True),
-                      comment_count=Count('comment', distinct=True))\
-            .order_by(f'{"-" if order_dir == "asc" else ""}{order_col}')
+    start = request.GET.get('start')
+    length = request.GET.get('length')
 
-    response.update({'recordsFiltered': snippets.count()})
+    sql = (f'''WITH vars(search_var) AS (values('{search if search else ""}%')) SELECT s.name AS name, s.lang_id AS lang, COUNT(DISTINCT sl.id) AS like_count, COUNT(DISTINCT c.id) AS comment_count, {"s.is_private AS is_private" if username else "u.username AS author"}, s.creation_date AS creation_date, s.slug AS slug FROM "MainApp_snippet" AS s LEFT OUTER JOIN "MainApp_comment" AS c ON s.id = c.snippet_id LEFT OUTER JOIN "MainApp_snippetlike" AS sl ON s.id = sl.snippet_id LEFT OUTER JOIN "auth_user" AS u ON s.author_id = u.id, vars {f"WHERE u.username = '{username}'" if username else "WHERE s.is_private = FALSE"} GROUP BY s.id, u.username, vars.search_var HAVING s."name" LIKE vars.search_var OR s.lang_id  LIKE vars.search_var OR u.username LIKE vars.search_var ORDER BY {order_col if order_col else 'creation_date'} {order_dir if order_dir else 'desc'};''')
 
-    start, length = int(request.GET.get('start')), int(request.GET.get('length'))
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+        columns = [col[0] for col in cursor.description]
+        data = [
+            dict(zip(columns, row))
+            for row in cursor.fetchall()
+        ]
+
+    response = {
+        'data': data,
+        'recordsTotal': Snippet.objects.all().count(),
+        'recordsFiltered': len(data)
+    }
+
     if start and length:
         response.update({
-            'data': [snippet.to_dict_json() for snippet in snippets[start:start + length-1]],
-            'page': math.ceil(start / length) + 1,
-            'per_page': length,
+            'page': math.ceil(int(start) / int(length)) + 1,
+            'per_page': int(length),
         })
-    else:
-        response.update({
-            'data': [snippet.to_dict_json() for snippet in snippets]
-        })
+    # pp(connection.queries)
     return JsonResponse(response)
 
 
 def snippet_json_non_private(request):
-    """
-    This function call snippet_json function with non-private snippets queryset as parameter
-    """
-    return snippet_json(request, Snippet.objects.filter(is_private=False))
+    return snippets_json(request)
 
 
 @login_required
 def snippet_json_user_is_author(request):
-    """
-    This function call snippet_json function with user's snippets queryset as parameter
-    """
-    return snippet_json(request, Snippet.objects.filter(author=request.user))
+    return snippets_json(request, request.user.username)
 
 
 @login_required(redirect_field_name=None)
