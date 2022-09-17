@@ -33,6 +33,7 @@ urlpatterns = [
     path('snippets/<slug:slug>', main_views.SnippetDetailView.as_view(), name='snippet_detail_page'),
     path('snippets/<slug:slug>/update', login_required(main_views.SnippetUpdateView.as_view()), name='snippet_update_page'),
     path('snippets/<slug:slug>/delete', login_required(main_views.SnippetDeleteView.as_view()), name='snippet_delete_page'),
+    path('snippets/<slug:slug>/toast_delete', main_views.snippet_delete, name='snippet_delete'),
     path('comment/create', main_views.create_comment, name='create_comment'),
     path('comment/delete/<int:pk>', main_views.delete_comment, name='delete_comment'),
     path('ajax/switch_snippetlike/<int:snippet_id>', main_views.switch_snippetlike, name='switch_snippetlike'),

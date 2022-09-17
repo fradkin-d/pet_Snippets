@@ -15,83 +15,128 @@
     </tr>
     </thead>
 </table>
+
+<div class="position-fixed top-50 start-50 translate-middle">
+    <div id="liveToast" class="toast fade hide" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-dark text-white">
+            <img src="{% static 'icons/alert-warning.png' %}" class="me-2" width="16">
+
+            <strong id="toast_delete_title" class="me-auto">Удаление: "snippet name"</strong>
+        </div>
+        <div class="toast-body">
+            Вы уверены, что хотите удалить этот сниппет?
+            <div class="mt-2 pt-2 border-top">
+                <button type="button" class="btn btn-danger">
+                    <a href="" id="toast_delete_url"
+                       style="text-decoration: none; color: white;">Удалить</a>
+                </button>
+                <button type="button" class="btn" data-bs-dismiss="toast">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block script %}
 <script>
-    $(document).ready( function () {
-        $('#snippets_table').DataTable({
-            language: {
-                url: '{% static 'json/datatables-russian.json' %}'
-            },
-            order: [[5, 'asc']],
-            "processing": true,
-            "serverSide": true,
-            "ajax": "/ajax/snippet_user_is_author/json",
-            "columns": [
-                {
-                    "data": "is_private",
-                    "render": function(data, type, row, meta){
-                        if (data) {
-                            data = '<img src={% static 'icons/lock.png' %} height=16>';
-                        } else {
-                            data = '';
-                        }
-                        return data
+$(document).ready( function () {
+    $('#snippets_table').DataTable({
+        language: {
+            url: '{% static 'json/datatables-russian.json' %}'
+        },
+        order: [[5, 'asc']],
+        "processing": true,
+        "serverSide": true,
+        "ajax": "/ajax/snippet_user_is_author/json",
+        "columns": [
+            {
+                "data": "is_private",
+                "render": function(data, type, row, meta){
+                    if (data) {
+                        data = '<img src={% static 'icons/lock.png' %} height=16>';
+                    } else {
+                        data = '';
                     }
-                },
-                {
-                    "data": "name",
-                    "render": function(data, type, row, meta){
-                        name = data;
-                        if (name.length > 30) name = name.slice(0, 30
-                        ) + '...';
-                        data = '<a href="/snippets/' + row.slug + '">' + name + '</a>';
-                        return data;
-                    }
-                },
-                {"data": "lang"},
-                {"data": "like_count"},
-                {"data": "comment_count"},
-                {
-                    "data": "creation_date",
-                    "render": function(data, type, row, meta){
-                        d = new Date(data);
-                        dd = '' + d.getDate();
-                        mm = '' + d.getMonth();
-                        yy = d.getFullYear();
-                        HH = '' + d.getHours();
-                        MM = '' + d.getMinutes();
-
-                        if (dd.length < 2) dd = '0' + dd;
-                        if (mm.length < 2) mm = '0' + mm;
-                        if (HH.length < 2) HH = '0' + HH;
-                        if (MM.length < 2) MM = '0' + MM;
-
-                        data = dd + '.' + mm + ' ' + yy + ' ' + HH + ':' + MM;
-                        return data;
-                    }
-                },
-                {
-                    "data": null,
-                    "orderable": false,
-                    "render": function(data, type, row, meta){
-                        data = '<a href="/snippets/' + row.slug + '/update"><img src={% static 'icons/edit.png' %} height=16></a>' +
-                               '&ThickSpace;|&ThickSpace;<a href="/snippets/' + row.slug + '/delete"><img src={% static 'icons/delete.png' %} height=16></a>';
-                        return data
-                    }
+                    return data
                 }
-            ],
-            columnDefs: [
-                { width: '0%', targets: [0, 3, 4] },
-                { width: '6%', targets: [6,] },
-                { width: '12%', targets: [2, 5,] },
-            ],
-            rowReorder: {
-                selector: 'td:nth-child(2)'
             },
-            responsive: true
-        });
+            {
+                "data": "name",
+                "render": function(data, type, row, meta){
+                    name = data;
+                    if (name.length > 30) name = name.slice(0, 30
+                    ) + '...';
+                    data = '<a href="/snippets/' + row.slug + '">' + name + '</a>';
+                    return data;
+                }
+            },
+            {"data": "lang"},
+            {"data": "like_count"},
+            {"data": "comment_count"},
+            {
+                "data": "creation_date",
+                "render": function(data, type, row, meta){
+                    d = new Date(data);
+                    dd = '' + d.getDate();
+                    mm = '' + d.getMonth();
+                    yy = d.getFullYear();
+                    HH = '' + d.getHours();
+                    MM = '' + d.getMinutes();
+
+                    if (dd.length < 2) dd = '0' + dd;
+                    if (mm.length < 2) mm = '0' + mm;
+                    if (HH.length < 2) HH = '0' + HH;
+                    if (MM.length < 2) MM = '0' + MM;
+
+                    data = dd + '.' + mm + ' ' + yy + ' ' + HH + ':' + MM;
+                    return data;
+                }
+            },
+            {
+                "data": null,
+                "orderable": false,
+                "render": function(data, type, row, meta){
+                    data = '<a href="/snippets/' + row.slug + '/update"><img src={% static 'icons/edit.png' %} height=16></a>' +
+                           '&ThickSpace;|&ThickSpace;' +
+                           '<img class="delete_snippet_button" src="{% static 'icons/delete.png' %}" width="16"' +
+                           ' style="cursor: pointer;" data-slug="' + row.slug + '", data-name="' + row.name + '">';
+                    return data
+                }
+            }
+        ],
+        columnDefs: [
+            { width: '0%', targets: [0, 3, 4] },
+            { width: '6%', targets: [6,] },
+            { width: '12%', targets: [2, 5,] },
+        ],
+        rowReorder: {
+            selector: 'td:nth-child(2)'
+        },
+        responsive: true
     });
+    resolve()
+})
+
+$(document).ajaxComplete(function bind_delete_buttons() {
+    var delete_buttons = document.getElementsByClassName("delete_snippet_button");
+    var f = document.getElementById('liveToast');
+    console.log(f)
+
+    function delete_toast_constructor(title, href) {
+        return function() {
+            document.getElementById('toast_delete_title').innerHTML = title;
+            document.getElementById('toast_delete_url').href = href;
+            var delete_toast = new bootstrap.Toast(f);
+            delete_toast.show();
+        }
+    }
+
+    for (var i = 0; i < delete_buttons.length; i++) {
+        new_title = 'Удаление: ' + delete_buttons[i].getAttribute("data-name");
+        new_href = '/snippets/' + delete_buttons[i].getAttribute("data-slug") + '/toast_delete';
+        console.log('title:', new_title, 'href:', new_href);
+        delete_buttons[i].addEventListener('click', delete_toast_constructor(new_title, new_href))
+    }
+})
 </script>
 {% endblock %}

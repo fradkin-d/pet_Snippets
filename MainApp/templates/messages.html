@@ -1,7 +1,7 @@
 {% load static %}
 <div class="toast-container position-absolute p-4 top-0 end-0 mt-5">
 {% for message in messages %}
-  <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+  <div id="message_toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
       {% if message.tags == 'alert-success' %}
       <img src="{% static 'icons/alert-success.png' %}" class="rounded me-2" alt="" width="16">

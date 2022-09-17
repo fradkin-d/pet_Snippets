@@ -119,6 +119,12 @@ class SnippetDeleteView(SuccessMessageMixin, DeleteView):
         return context
 
 
+def snippet_delete(request, slug):
+    Snippet.objects.filter(slug=slug, author=request.user).delete()
+    messages.success(request, f'Сниппет удален')
+    return redirect('my_snippets_list_page')
+
+
 class SnippetDetailView(DetailView):
     model = Snippet
     template_name = 'pages/snippet_detail.html'

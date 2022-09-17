@@ -49,6 +49,7 @@ list-style-type: none;
 }
 
 
+
 </style>
 <link href="{% static 'css/pastie-theme.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
@@ -78,14 +79,14 @@ list-style-type: none;
     <div class="col-sm">
         <table class="table table-borderless">
             <thead class="border-bottom">
-                <tr>
-                    <th class="table-light">Описание</th>
-                </tr>
+            <tr>
+                <th class="table-light">Описание</th>
+            </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>{{ snippet.description }}</td>
-                </tr>
+            <tr>
+                <td>{{ snippet.description }}</td>
+            </tr>
             </tbody>
         </table>
     </div>
@@ -126,9 +127,7 @@ list-style-type: none;
         </a>
     </div>
     <div class="col-2">
-        <a href="{% url 'snippet_delete_page' snippet.slug %}">
-            <img src="{% static 'icons/delete.png' %}" width="16">
-        </a>
+        <img id="delete_snippet_button" src="{% static 'icons/delete.png' %}" width="16" style="cursor: pointer;">
     </div>
     {% endif %}
 </div>
@@ -188,9 +187,7 @@ list-style-type: none;
         </a>
     </div>
     <div class="col-2">
-        <a href="{% url 'snippet_delete_page' snippet.slug %}">
-            <img src="{% static 'icons/delete.png' %}" width="16">
-        </a>
+        <img id="delete_snippet_button" src="{% static 'icons/delete.png' %}" width="16" style="cursor: pointer;">
     </div>
     {% endif %}
 </div>
@@ -201,6 +198,27 @@ list-style-type: none;
     </div>
 </div>
 {% endif %}
+
+<div class="position-fixed top-50 start-50 translate-middle">
+    <div id="liveToast" class="toast fade hide" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-dark text-white">
+            <img src="{% static 'icons/alert-warning.png' %}" class="me-2" width="16">
+
+            <strong class="me-auto">Удаление</strong>
+        </div>
+        <div class="toast-body">
+            Вы уверены, что хотите удалить этот сниппет?
+            <div class="mt-2 pt-2 border-top">
+                <button type="button" class="btn btn-danger">
+                    <a href="{% url 'snippet_delete' snippet.slug %}"
+                       style="text-decoration: none; color: white;">Удалить</a>
+                </button>
+                <button type="button" class="btn" data-bs-dismiss="toast">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block script %}
@@ -209,6 +227,7 @@ list-style-type: none;
 
 <script>
     window.snippetlike_url = "{% url 'switch_snippetlike' snippet.id %}"
+
 </script>
 
 <!-- Like button handling -->
@@ -237,6 +256,7 @@ list-style-type: none;
             }
         });
     });
+
 </script>
 
 <!-- Ctrl+C button handling -->
@@ -255,5 +275,14 @@ list-style-type: none;
         button.classList.remove('btn-outline-secondary');
         button.classList.add('btn-success');
     }
+</script>
+
+<script>
+    delete_button = document.getElementById('delete_snippet_button'),
+    f = document.getElementById('liveToast'),
+    delete_button.addEventListener('click',function(){
+        var a = new bootstrap.Toast(f);
+        a.show()
+    })
 </script>
 {% endblock %}
