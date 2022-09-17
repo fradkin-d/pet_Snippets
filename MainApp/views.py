@@ -221,5 +221,5 @@ def switch_snippetlike(request, snippet_id):
     if response['was_liked']:
         SnippetLike.objects.filter(snippet=snippet, author=request.user).delete()
     else:
-        SnippetLike(snippet=snippet, author=request.user).save()
+        SnippetLike.objects.create(snippet=snippet, author=request.user)
     return JsonResponse(response)

@@ -1,6 +1,21 @@
+{% load static %}
+<div class="toast-container position-absolute p-4 top-0 end-0 mt-5">
 {% for message in messages %}
-  <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    {{ message }}
+  <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      {% if message.tags == 'alert-success' %}
+      <img src="{% static 'icons/alert-success.png' %}" class="rounded me-2" alt="" width="16">
+      <strong class="me-auto">Готово!</strong>
+      {% elif message.tags == 'alert-danger' %}
+      <img src="{% static 'icons/alert-danger.png' %}" class="rounded me-2" alt="" width="16">
+      <strong class="me-auto">Ошибка!</strong>
+      {% endif %}
+      <small class="text-muted">{% now "j.m.Y H:i" %}</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      {{ message }}
+    </div>
   </div>
 {% endfor %}
+</div>
