@@ -227,18 +227,14 @@ list-style-type: none;
 
 <script>
     window.snippetlike_url = "{% url 'switch_snippetlike' snippet.id %}"
-
 </script>
 
 <!-- Like button handling -->
 <script>
     $('#like_button').click(function(){
-        console.log('like_clicked');
-
-        var pk = $(this).attr('name');
-        var like_image = $(this).find('.like_image');
-        var like_count = parseInt($('#like_count').text());
-        console.log('like_count:', like_count);
+        let pk = $(this).attr('name');
+        let likeImage = $(this).find('.like_image');
+        let likeCount = parseInt($('#like_count').text());
 
         $.ajax({
             url: window.snippetlike_url,
@@ -247,11 +243,11 @@ list-style-type: none;
             dataType: "json",
             success: function(response) {
                 if (response.was_liked) {
-                    like_image.attr('src', '{% static 'icons/heart_0.png' %}');
-                    $('#like_count').text(like_count - 1)
+                    likeImage.attr('src', '{% static 'icons/heart_0.png' %}');
+                    $('#like_count').text(likeCount - 1)
                 } else {
-                    like_image.attr('src', '{% static 'icons/heart_1.png' %}');
-                    $('#like_count').text(like_count + 1)
+                    likeImage.attr('src', '{% static 'icons/heart_1.png' %}');
+                    $('#like_count').text(likeCount + 1)
                 }
             }
         });
@@ -262,27 +258,35 @@ list-style-type: none;
 <!-- Ctrl+C button handling -->
 <script>
     function CopyToClipboard() {
-        // Copy text
-        var r = document.createRange();
-        r.selectNode(document.getElementById('copy-code'));
-        window.getSelection().removeAllRanges();
-        window.getSelection().addRange(r);
-        document.execCommand('copy');
-        window.getSelection().removeAllRanges();
+        copyText();
+        changeButton();
 
-        // Change copy button
-        var button = document.getElementById('copy-button');
-        button.classList.remove('btn-outline-secondary');
-        button.classList.add('btn-success');
+        function copyText() {
+            let r = document.createRange();
+
+            r.selectNode(document.getElementById('copy-code'));
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(r);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+        }
+
+        function changeButton() {
+            let button = document.getElementById('copy-button');
+
+            button.classList.remove('btn-outline-secondary');
+            button.classList.add('btn-success');
+        }
     }
 </script>
 
 <script>
-    delete_button = document.getElementById('delete_snippet_button'),
-    f = document.getElementById('liveToast'),
-    delete_button.addEventListener('click',function(){
-        var a = new bootstrap.Toast(f);
-        a.show()
+    let deleteButton = document.getElementById('delete_snippet_button');
+    let toast = document.getElementById('liveToast');
+
+    deleteButton.addEventListener('click', function(){
+        let toastDelete = new bootstrap.Toast(toast);
+        toastDelete.show()
     })
 </script>
 {% endblock %}

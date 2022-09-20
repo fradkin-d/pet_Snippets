@@ -20,7 +20,6 @@
     <div id="liveToast" class="toast fade hide" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header bg-dark text-white">
             <img src="{% static 'icons/alert-warning.png' %}" class="me-2" width="16">
-
             <strong id="toast_delete_title" class="me-auto">Удаление: "snippet name"</strong>
         </div>
         <div class="toast-body">
@@ -39,6 +38,7 @@
 
 {% block script %}
 <script>
+'use strict'
 $(document).ready( function () {
     $('#snippets_table').DataTable({
         language: {
@@ -52,22 +52,19 @@ $(document).ready( function () {
             {
                 "data": "is_private",
                 "render": function(data, type, row, meta){
-                    if (data) {
-                        data = '<img src={% static 'icons/lock.png' %} height=16>';
-                    } else {
-                        data = '';
-                    }
-                    return data
+                    return data ? '<img src={% static 'icons/lock.png' %} height=16>' : '';
                 }
             },
             {
                 "data": "name",
                 "render": function(data, type, row, meta){
-                    name = data;
-                    if (name.length > 30) name = name.slice(0, 30
-                    ) + '...';
-                    data = '<a href="/snippets/' + row.slug + '">' + name + '</a>';
-                    return data;
+                    let name = data;
+
+                    if (name.length > 30) {
+                        name = name.slice(0, 30) + '...';
+                    }
+
+                    return `<a href="/snippets/${row.slug}">${name}</a>`;
                 }
             },
             {"data": "lang"},
@@ -76,31 +73,37 @@ $(document).ready( function () {
             {
                 "data": "creation_date",
                 "render": function(data, type, row, meta){
-                    d = new Date(data);
-                    dd = '' + d.getDate();
-                    mm = '' + d.getMonth();
-                    yy = d.getFullYear();
-                    HH = '' + d.getHours();
-                    MM = '' + d.getMinutes();
+                    let d = new Date(data);
+                    let dd = '' + d.getDate();
+                    let mm = '' + d.getMonth();
+                    let yy = d.getFullYear();
+                    let HH = '' + d.getHours();
+                    let MM = '' + d.getMinutes();
 
-                    if (dd.length < 2) dd = '0' + dd;
-                    if (mm.length < 2) mm = '0' + mm;
-                    if (HH.length < 2) HH = '0' + HH;
-                    if (MM.length < 2) MM = '0' + MM;
+                    if (dd.length < 2) {dd = '0' + dd;}
+                    if (mm.length < 2) {mm = '0' + mm;}
+                    if (HH.length < 2) {HH = '0' + HH;}
+                    if (MM.length < 2) {MM = '0' + MM;}
 
-                    data = dd + '.' + mm + ' ' + yy + ' ' + HH + ':' + MM;
-                    return data;
+                    return `${dd}.${mm} ${yy} ${HH}:${MM}`;
                 }
             },
             {
                 "data": null,
                 "orderable": false,
                 "render": function(data, type, row, meta){
-                    data = '<a href="/snippets/' + row.slug + '/update"><img src={% static 'icons/edit.png' %} height=16></a>' +
-                           '&ThickSpace;|&ThickSpace;' +
-                           '<img class="delete_snippet_button" src="{% static 'icons/delete.png' %}" width="16"' +
-                           ' style="cursor: pointer;" data-slug="' + row.slug + '", data-name="' + row.name + '">';
-                    return data
+                    return `
+                        <a href="/snippets/${row.slug}/update?next={% url 'my_snippets_list_page' %}">
+                            <img src={% static 'icons/edit.png' %} height=16>
+                        </a>
+                        &ThickSpace;|&ThickSpace;
+                        <img class="delete_snippet_button"
+                             src="{% static 'icons/delete.png' %}"
+                             width="16"
+                             style="cursor: pointer;"
+                             data-slug="${row.slug}",
+                             data-name="${row.name}">
+                    `;
                 }
             }
         ],
@@ -117,25 +120,26 @@ $(document).ready( function () {
     resolve()
 })
 
-$(document).ajaxComplete(function bind_delete_buttons() {
-    var delete_buttons = document.getElementsByClassName("delete_snippet_button");
-    var f = document.getElementById('liveToast');
-    console.log(f)
+$(document).ajaxComplete(function () {
+    let deleteButtons = document.getElementsByClassName("delete_snippet_button");
+    let toast = document.getElementById('liveToast');
 
-    function delete_toast_constructor(title, href) {
-        return function() {
-            document.getElementById('toast_delete_title').innerHTML = title;
-            document.getElementById('toast_delete_url').href = href;
-            var delete_toast = new bootstrap.Toast(f);
-            delete_toast.show();
-        }
+    for (let i = 0; i < deleteButtons.length; i++) {
+        let new_title = `Удаление: ${deleteButtons[i].getAttribute("data-name")}`;
+        let new_href = `/snippets/${deleteButtons[i].getAttribute("data-slug")}/toast_delete`;
+
+        deleteButtons[i].addEventListener('click', showToastDelete(new_title, new_href))
     }
 
-    for (var i = 0; i < delete_buttons.length; i++) {
-        new_title = 'Удаление: ' + delete_buttons[i].getAttribute("data-name");
-        new_href = '/snippets/' + delete_buttons[i].getAttribute("data-slug") + '/toast_delete';
-        console.log('title:', new_title, 'href:', new_href);
-        delete_buttons[i].addEventListener('click', delete_toast_constructor(new_title, new_href))
+    function createToastDelete(title, href) {
+        document.getElementById('toast_delete_title').innerHTML = title;
+        document.getElementById('toast_delete_url').href = href;
+
+        return new bootstrap.Toast(toast);
+    }
+
+    function showToastDelete(new_title, new_href) {
+        return function () {createToastDelete(new_title, new_href).show();}
     }
 })
 </script>
