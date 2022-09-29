@@ -125,21 +125,24 @@ $(document).ajaxComplete(function () {
     let toast = document.getElementById('liveToast');
 
     for (let i = 0; i < deleteButtons.length; i++) {
-        let new_title = `Удаление: ${deleteButtons[i].getAttribute("data-name")}`;
-        let new_href = `/snippets/${deleteButtons[i].getAttribute("data-slug")}/toast_delete`;
+        let name = deleteButtons[i].getAttribute("data-name");
+        let slug = deleteButtons[i].getAttribute("data-slug")
 
-        deleteButtons[i].addEventListener('click', showToastDelete(new_title, new_href))
+        let newTitle = `Удаление: ${name}`;
+        let newHref = `/snippets/${slug}/toast_delete`;
+
+        deleteButtons[i].addEventListener('click', showToastDelete(newTitle, newHref))
     }
 
-    function createToastDelete(title, href) {
-        document.getElementById('toast_delete_title').innerHTML = title;
-        document.getElementById('toast_delete_url').href = href;
+    function createToastDelete(newTitle, newHref) {
+        document.getElementById('toast_delete_title').innerHTML = newTitle;
+        document.getElementById('toast_delete_url').href = newHref;
 
         return new bootstrap.Toast(toast);
     }
 
-    function showToastDelete(new_title, new_href) {
-        return function () {createToastDelete(new_title, new_href).show();}
+    function showToastDelete(newTitle, newHref) {
+        return function () {createToastDelete(newTitle, newHref).show();}
     }
 })
 </script>
