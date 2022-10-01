@@ -10,28 +10,26 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ('MainApp', '0001_initial'),
+        ('Comments', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SupportedLang',
+            name='SnippetLike',
             fields=[
-                ('lang', models.CharField(max_length=25, primary_key=True, serialize=False)),
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('snippet', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='MainApp.snippet')),
             ],
         ),
         migrations.CreateModel(
-            name='Snippet',
+            name='CommentLike',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('description', models.CharField(default='', max_length=250)),
-                ('code', models.TextField(max_length=5000)),
-                ('creation_date', models.DateTimeField(auto_now_add=True)),
-                ('is_private', models.BooleanField()),
-                ('slug', models.SlugField(default=None, max_length=150, unique=True)),
                 ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('lang', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='MainApp.supportedlang')),
+                ('comment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Comments.comment')),
             ],
         ),
     ]

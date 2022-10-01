@@ -14,30 +14,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from MainApp import views as main_views
-from django.contrib.auth.decorators import login_required
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', main_views.index_page, name='home'),
-    path('accounts/registration/', main_views.registration, name='registration'),
-    path('accounts/login/', main_views.login, name='login'),
-    path('accounts/logout/', main_views.logout, name='logout'),
-    path('snippets/', main_views.snippets_list, name='snippets_list_page'),
-    path('snippets/my_list', main_views.user_snippets_list, name='my_snippets_list_page'),
-    path('snippets/add', login_required(main_views.SnippetCreateView.as_view()), name='add_snippet_page'),
-    path('snippets/<slug:slug>', main_views.SnippetDetailView.as_view(), name='snippet_detail_page'),
-    path('snippets/<slug:slug>/update', login_required(main_views.SnippetUpdateView.as_view()), name='snippet_update_page'),
-    path('snippets/<slug:slug>/delete', login_required(main_views.SnippetDeleteView.as_view()), name='snippet_delete_page'),
-    path('snippets/<slug:slug>/toast_delete', main_views.snippet_delete, name='snippet_delete'),
-    path('comment/create', main_views.create_comment, name='create_comment'),
-    path('comment/delete/<int:pk>', main_views.delete_comment, name='delete_comment'),
-    path('ajax/switch_snippetlike/<int:snippet_id>', main_views.switch_snippetlike, name='switch_snippetlike'),
-    path('ajax/snippet_non_private/json', main_views.snippet_json_non_private, name='snippet_non_private_json'),
-    path('ajax/snippet_user_is_author/json', main_views.snippet_json_user_is_author, name='snippet_user_is_author_json'),
+    path('accounts/', include('Accounts.urls')),
+    path('snippets/', include('MainApp.urls')),
+    path('comment/', include('Comments.urls')),
+    path('ajax/', include('AJAX.urls'))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

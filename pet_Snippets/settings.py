@@ -52,6 +52,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'MainApp',
+    'Accounts',
+    'Comments',
+    'AJAX',
     'crispy_forms',
     'datatableview',
 ]

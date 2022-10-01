@@ -38,19 +38,3 @@ class Snippet(models.Model):
             'slug': self.slug,
         }
 
-
-class Comment(models.Model):
-    snippet = models.ForeignKey(Snippet, on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True)
-    text = models.TextField(max_length=250)
-
-
-class SnippetLike(models.Model):
-    snippet = models.ForeignKey(Snippet, on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-
-
-class CommentLike(models.Model):
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
