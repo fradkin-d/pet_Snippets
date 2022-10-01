@@ -28,14 +28,16 @@ def top_ten_by_rating():
     """
     Returns top-10 snippets by rating
     """
-    return Snippet.objects.filter(is_private=False).annotate(likes=Count('snippetlike')).filter(likes__gt=0).order_by('-likes')[:10]
+    return Snippet.objects.filter(is_private=False).annotate(likes=Count('snippetlike')).filter(likes__gt=0).order_by(
+        '-likes')[:10]
 
 
 def top_ten_by_reviews():
     """
     Returns top-10 snippets by reviews
     """
-    return Snippet.objects.filter(is_private=False).annotate(comments=Count('comment')).filter(comments__gt=0).order_by('-comments')[:10]
+    return Snippet.objects.filter(is_private=False).annotate(comments=Count('comment')).filter(comments__gt=0).order_by(
+        '-comments')[:10]
 
 
 def registration(request):
@@ -168,7 +170,27 @@ def snippets_json(request, username=''):
     start = request.GET.get('start')
     length = request.GET.get('length')
 
-    sql = f'''WITH vars(search_var) AS (values('{search if search else ""}%')) SELECT s.name AS name, s.lang_id AS lang, COUNT(DISTINCT sl.id) AS like_count, COUNT(DISTINCT c.id) AS comment_count, {"s.is_private AS is_private" if username else "u.username AS author"}, s.creation_date AS creation_date, s.slug AS slug FROM "MainApp_snippet" AS s LEFT OUTER JOIN "MainApp_comment" AS c ON s.id = c.snippet_id LEFT OUTER JOIN "MainApp_snippetlike" AS sl ON s.id = sl.snippet_id LEFT OUTER JOIN "auth_user" AS u ON s.author_id = u.id, vars {f"WHERE u.username = '{username}'" if username else "WHERE s.is_private = FALSE"} GROUP BY s.id, u.username, vars.search_var HAVING s."name" LIKE vars.search_var OR s.lang_id  LIKE vars.search_var OR u.username LIKE vars.search_var ORDER BY {order_col if order_col else 'creation_date'} {order_dir if order_dir else 'desc'}'''
+    sql = f'''
+    WITH vars(search_var) AS (values('{search if search else ""}%')) 
+    SELECT 
+        s.name AS name, 
+        s.lang_id AS lang, 
+        COUNT(DISTINCT sl.id) AS like_count, 
+        COUNT(DISTINCT c.id) AS comment_count, 
+        {"s.is_private AS is_private" if username else "u.username AS author"}, 
+        s.creation_date AS creation_date, 
+        s.slug AS slug 
+    FROM "MainApp_snippet" AS s 
+    LEFT OUTER JOIN "MainApp_comment" AS c ON s.id = c.snippet_id 
+    LEFT OUTER JOIN "MainApp_snippetlike" AS sl ON s.id = sl.snippet_id 
+    LEFT OUTER JOIN "auth_user" AS u ON s.author_id = u.id, 
+    vars {f"WHERE u.username = '{username}'" if username else "WHERE s.is_private = FALSE"} 
+    GROUP BY s.id, u.username, vars.search_var 
+    HAVING s."name" LIKE vars.search_var 
+        OR s.lang_id  LIKE vars.search_var 
+        OR u.username LIKE vars.search_var 
+    ORDER BY {order_col if order_col else 'creation_date'} {order_dir if order_dir else 'desc'}
+    '''
 
     with connection.cursor() as cursor:
         cursor.execute(sql)
