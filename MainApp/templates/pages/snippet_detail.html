@@ -47,12 +47,6 @@ list-style-type: none;
 .asteriskField {
     display: none;
 }
-
-
-
-
-
-
 </style>
 <link href="{% static 'css/pastie-theme.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
@@ -107,37 +101,42 @@ list-style-type: none;
     </div>
 </div>
 
-{% if not snippet.is_private %}
-<div class="row">
-    <div class="col-2">
+
+<div class="row" align="center">
+    {% if not snippet.is_private %}
+    <div class="col">
         {% if anon_user %}
         <img src="{% static 'icons/heart_1.png' %}" style="text-decoration: none;" height="16">
         {% else %}
-        <span id="like_button" name="{{ snippet.id }}" href="" style="text-decoration: none;">
-            {% if not is_liked %}
-            <img class="like_image" src="{% static 'icons/heart_0.png' %}" height="16">
-            {% else %}
-            <img class="like_image" src="{% static 'icons/heart_1.png' %}" height="16">
-            {% endif %}
+        <span id="like_button" style="text-decoration: none;">
+            <img class="like_image" src="
+                    {% if is_liked %}
+                    {% static 'icons/heart_1.png' %}
+                    {% else %}
+                    {% static 'icons/heart_0.png' %}
+                    {% endif %}" height="16">
         </span>
         {% endif %}
         <span id="like_count">{{ snippet.snippetlike_set.count }}</span>
     </div>
-    <div class="col-2">
+    <div class="col">
         <img src="{% static 'icons/comment.png' %}" height="16">&nbsp;{{ snippet.comment_set.all.count }}
     </div>
+    {% endif %}
     {% if snippet.author == user %}
-    <div class="col-2">
+    <div class="col">
         <a href="{% url 'snippet_update_page' snippet.slug %}?next={{ request.path }}">
             <img src="{% static 'icons/edit.png' %}" width="16">
         </a>
     </div>
-    <div class="col-2">
+    <div class="col">
         <img id="delete_snippet_button" src="{% static 'icons/delete.png' %}" width="16" style="cursor: pointer;">
     </div>
     {% endif %}
 </div>
+
 <hr>
+{% if not snippet.is_private %}
 <div class="comments">
     <ul class="media-list">
         {% for comment in snippet.comment_set.all|dictsortreversed:'date' %}
@@ -186,20 +185,7 @@ list-style-type: none;
 </div>
 {% else %}
 <div class="row">
-    {% if snippet.author == user %}
-    <div class="col-2">
-        <a href="{% url 'snippet_update_page' snippet.slug %}?next={{ request.path }}">
-            <img src="{% static 'icons/edit.png' %}" width="16">
-        </a>
-    </div>
-    <div class="col-2">
-        <img id="delete_snippet_button" src="{% static 'icons/delete.png' %}" width="16" style="cursor: pointer;">
-    </div>
-    {% endif %}
-</div>
-<div class="row">
-    <hr>
-    <div class="col-4" align="center">
+    <div class="col" align="center">
         Приватный сниппет комментировать нельзя
     </div>
 </div>
