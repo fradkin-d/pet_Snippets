@@ -27,8 +27,8 @@ def snippets_json(request, username=''):
         s.creation_date AS creation_date, 
         s.slug AS slug 
     FROM "MainApp_snippet" AS s 
-    LEFT OUTER JOIN "MainApp_comment" AS c ON s.id = c.snippet_id 
-    LEFT OUTER JOIN "MainApp_snippetlike" AS sl ON s.id = sl.snippet_id 
+    LEFT OUTER JOIN "Comments_comment" AS c ON s.id = c.snippet_id 
+    LEFT OUTER JOIN "AJAX_snippetlike" AS sl ON s.id = sl.snippet_id 
     LEFT OUTER JOIN "auth_user" AS u ON s.author_id = u.id, 
     vars {f"WHERE u.username = '{username}'" if username else "WHERE s.is_private = FALSE"} 
     GROUP BY s.id, u.username, vars.search_var 
